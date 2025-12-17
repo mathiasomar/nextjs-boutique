@@ -12,25 +12,35 @@ const prisma = new PrismaClient({
 
 async function main() {
   // Create admin user
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  // const hashedPassword = await bcrypt.hash("admin123", 10);
 
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@boutique.com" },
+  // const admin = await prisma.user.upsert({
+  //   where: { email: "admin@boutique.com" },
+  //   update: {},
+  //   create: {
+  //     id: "admin_001",
+  //     name: "Admin User",
+  //     email: "admin@boutique.com",
+  //     emailVerified: true,
+  //     role: Role.ADMIN,
+  //     accounts: {
+  //       create: {
+  //         id: "acc_001",
+  //         accountId: "admin_001",
+  //         providerId: "credentials",
+  //         password: hashedPassword,
+  //       },
+  //     },
+  //   },
+  // });
+
+  // Create code
+  const randomCode = Math.floor(Math.random() * 9000) + 1000;
+  const code = await prisma.userCode.upsert({
+    where: { code: randomCode },
     update: {},
     create: {
-      id: "admin_001",
-      name: "Admin User",
-      email: "admin@boutique.com",
-      emailVerified: true,
-      role: Role.ADMIN,
-      accounts: {
-        create: {
-          id: "acc_001",
-          accountId: "admin_001",
-          providerId: "credentials",
-          password: hashedPassword,
-        },
-      },
+      code: randomCode,
     },
   });
 
@@ -85,7 +95,7 @@ async function main() {
     }),
   ]);
 
-  console.log({ admin, categories, products });
+  console.log({ code, categories, products });
 }
 
 main()

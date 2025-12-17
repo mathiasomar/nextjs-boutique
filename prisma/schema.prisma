@@ -77,6 +77,14 @@ enum AppointmentType {
   OTHER
 }
 
+model UserCode {
+  id   String @id @default(cuid())
+  code Int    @unique
+
+  @@index([code])
+  @@map("codes")
+}
+
 model User {
   id            String         @id
   name          String

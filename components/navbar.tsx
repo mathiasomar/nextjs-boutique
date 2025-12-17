@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -11,8 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "./mode-toggle";
 import { SidebarTrigger } from "./ui/sidebar";
+import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
 
 const Navbar = () => {
+  const handleLogout = async () => {
+    await authClient.signOut();
+    redirect("/");
+  };
   return (
     <nav className="p-4 flex items-center justify-between sticky bg-background top-0 z-10">
       {/* LEFT */}
@@ -41,7 +49,7 @@ const Navbar = () => {
               <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive">
+            <DropdownMenuItem variant="destructive" onClick={handleLogout}>
               <LogOut className="h-[1.2rem] w-[1.2rem] mr-2" />
               Logout
             </DropdownMenuItem>

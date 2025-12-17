@@ -1,6 +1,5 @@
 import {
   Calendar,
-  ChevronUp,
   Home,
   Inbox,
   Plus,
@@ -9,12 +8,10 @@ import {
   Shirt,
   ShoppingBasket,
   User,
-  User2,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupContent,
@@ -28,12 +25,6 @@ import {
 } from "./ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 import { Sheet, SheetTrigger } from "./ui/sheet";
 import AddOrder from "./add-order";
 import AddUser from "./add-user";
@@ -77,7 +68,7 @@ const AppSidebar = () => {
             <SidebarMenuButton asChild>
               <Link href="/">
                 <Image src={"/logo.svg"} alt="logo" width={20} height={20} />
-                <span>Admin Dash</span>
+                <span>NajTrends Boutique</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -220,7 +211,7 @@ const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -239,7 +230,7 @@ const AppSidebar = () => {
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarFooter>
+      </SidebarFooter> */}
     </Sidebar>
   );
 };

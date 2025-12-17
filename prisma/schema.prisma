@@ -18,17 +18,79 @@ enum Role {
   STAFF
 }
 
+enum OrderStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  PAYPAL
+  OTHER
+}
+
+enum CustomerType {
+  REGULAR
+  VIP
+  WHOLESALE
+}
+
+enum InventoryType {
+  PURCHASE
+  SALE
+  RETURN
+  ADJUSTMENT
+  DAMAGE
+  TRANSFER
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  FITTING
+  CONSULTATION
+  ALTERATION
+  DELIVERY
+  OTHER
+}
+
 model User {
-  id            String    @id
+  id            String         @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
-  role          Role      @default(STAFF)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          Role           @default(STAFF)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
+  orders        Order[]
+  inventoryLogs InventoryLog[]
+  activityLogs  ActivityLog[]
 
   @@unique([email])
   @@map("users")
@@ -80,4 +142,203 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// Boutique Core Models
+model Customer {
+  id            String       @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String?      @unique
+  phone         String?
+  address       String?
+  postalCode    String?
+  birthDate     DateTime?
+  notes         String?      @db.Text
+  customerType  CustomerType @default(REGULAR)
+  loyaltyPoints Int          @default(0)
+
+  // Relations
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+
+  @@index([email])
+  @@index([phone])
+  @@map("customers")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[]
+
+  @@index([name])
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  sku         String  @unique
+  name        String
+  description String? @db.Text
+  categoryId  String
+  brand       String?
+  price       Decimal @db.Decimal(10, 2)
+  costPrice   Decimal @db.Decimal(10, 2)
+  size        String?
+  color       String?
+  material    String?
+
+  // Inventory
+  currentStock  Int     @default(0)
+  minStockLevel Int     @default(5)
+  maxStockLevel Int?
+  lowStockAlert Boolean @default(false)
+
+  // Media
+  images String[] // Array of image URLs
+
+  // Status
+  isActive   Boolean @default(true)
+  isFeatured Boolean @default(false)
+
+  // Relations
+  orderItems    OrderItem[]
+  inventoryLogs InventoryLog[]
+  supplierId    String?
+  category      Category       @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+
+  @@index([sku])
+  @@index([brand])
+  @@map("products")
+}
+
+model Order {
+  id            String         @id @default(cuid())
+  orderNumber   String         @unique
+  customer      Customer       @relation(fields: [customerId], references: [id])
+  customerId    String
+  status        OrderStatus    @default(PENDING)
+  paymentStatus PaymentStatus  @default(PENDING)
+  paymentMethod PaymentMethod?
+
+  // Pricing
+  subtotal Decimal @db.Decimal(10, 2)
+  tax      Decimal @default(0) @db.Decimal(10, 2)
+  discount Decimal @default(0) @db.Decimal(10, 2)
+  shipping Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
+
+  // Shipping/Delivery
+  shippingAddress String?
+  shippingMethod  String?
+  trackingNumber  String?
+
+  // Timestamps
+  orderDate         DateTime  @default(now())
+  estimatedDelivery DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+
+  // Relations
+  items         OrderItem[]
+  payments      Payment[]
+  createdByUser User?       @relation(fields: [createdBy], references: [id])
+  createdBy     String?
+
+  notes String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderNumber])
+  @@index([customerId])
+  @@index([status])
+  @@index([orderDate])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    String
+  product    Product @relation(fields: [productId], references: [id])
+  productId  String
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(10, 2)
+  discount   Decimal @default(0) @db.Decimal(10, 2)
+  totalPrice Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  @@unique([orderId, productId])
+  @@map("order_items")
+}
+
+model InventoryLog {
+  id            String        @id @default(cuid())
+  product       Product       @relation(fields: [productId], references: [id])
+  productId     String
+  type          InventoryType
+  quantity      Int
+  previousStock Int
+  newStock      Int
+  reason        String?       @db.Text
+  referenceId   String? // Could link to OrderId, ReturnId, etc
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("inventory_logs")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  order         Order         @relation(fields: [orderId], references: [id])
+  orderId       String
+  amount        Decimal       @db.Decimal(10, 2)
+  method        PaymentMethod
+  status        PaymentStatus @default(COMPLETED)
+  transactionId String?       @unique
+  notes         String?       @db.Text
+
+  processedAt DateTime @default(now())
+  processedBy String?
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([transactionId])
+  @@map("payments")
+}
+
+model ActivityLog {
+  id         String  @id @default(cuid())
+  user       User    @relation(fields: [userId], references: [id])
+  userId     String
+  action     String
+  entityType String? // e.g., "Order", "Product", "Customer"
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
 }

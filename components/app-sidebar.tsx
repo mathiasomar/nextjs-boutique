@@ -37,21 +37,21 @@ const items = [
     url: "/",
     icon: Home,
   },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
+  // {
+  //   title: "Inbox",
+  //   url: "#",
+  //   icon: Inbox,
+  // },
+  // {
+  //   title: "Calendar",
+  //   url: "#",
+  //   icon: Calendar,
+  // },
+  // {
+  //   title: "Search",
+  //   url: "#",
+  //   icon: Search,
+  // },
   {
     title: "Settings",
     url: "#",
@@ -66,7 +66,7 @@ const AppSidebar = () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href="/">
+              <Link href="/dashboard">
                 <Image src={"/logo.svg"} alt="logo" width={20} height={20} />
                 <span>NajTrends Boutique</span>
               </Link>
@@ -105,7 +105,7 @@ const AppSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/products">
+                  <Link href="/dashboard/products">
                     <Shirt />
                     See All Products
                   </Link>
@@ -153,7 +153,7 @@ const AppSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/users">
+                  <Link href="/dashboard/users">
                     <User />
                     See All Users
                   </Link>
@@ -186,7 +186,7 @@ const AppSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/payments">
+                  <Link href="/dashboard/payments">
                     <ShoppingBasket />
                     See All Transactios
                   </Link>

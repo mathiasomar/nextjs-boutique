@@ -19,3 +19,12 @@ export type CategoryProps = {
     name: string;
   };
 };
+
+export type Item = {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+};
+
+export type Items = Item[];

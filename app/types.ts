@@ -12,3 +12,10 @@ export type UserProps = {
     createdAt: Date;
   };
 };
+
+export type CategoryProps = {
+  category: {
+    id: string;
+    name: string;
+  };
+};

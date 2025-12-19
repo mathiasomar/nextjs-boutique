@@ -9,10 +9,6 @@ import {
 import { columns, User } from "./columns";
 import { DataTable } from "./data-table";
 import { getUsers } from "@/app/actions/user";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import AddUser from "@/components/add-user";
 
 const UsersPage = async () => {

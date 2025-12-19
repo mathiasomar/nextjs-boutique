@@ -159,8 +159,8 @@ export const updateProduct = async (id: string, formData: FormData) => {
       },
     });
 
-    revalidatePath("/products");
-    revalidatePath(`/products/${id}`);
+    revalidatePath("/dashboard/products");
+    revalidatePath(`/dashboard/products/${id}`);
     return { success: true, product };
   } catch (error) {
     console.error("Update product error:", error);

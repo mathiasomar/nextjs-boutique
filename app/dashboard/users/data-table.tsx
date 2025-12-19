@@ -2,6 +2,7 @@
 
 import {
   ColumnDef,
+  RowSelectionState,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -23,6 +24,8 @@ import { DataTablePagination } from "@/components/data-table-pagination";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { deleteManyUsers } from "@/app/actions/user";
+import toast from "react-hot-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -34,7 +37,8 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState({});
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [loading, setLoading] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -49,13 +53,38 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const selectedIds = table
+    .getSelectedRowModel()
+    .rows.map((row) => (row.original as { id: string }).id);
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      await deleteManyUsers(selectedIds);
+      setRowSelection({});
+      toast.success(`${selectedIds.length} User(s) deleted successfully!`);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete user(s)"
+      );
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="overflow-hidden rounded-md border">
       {Object.keys(rowSelection).length > 0 && (
-        <div className="flex justify-end my-2">
-          <Button className="text-sm" variant={"destructive"}>
+        <div className="flex justify-end m-2">
+          <Button
+            className="text-sm"
+            variant={"destructive"}
+            onClick={handleDelete}
+            disabled={loading}
+          >
             <Trash2 className="w-4 h-4" />
-            Delete User(s)
+            Delete selected ({selectedIds.length}) User(s)
           </Button>
         </div>
       )}

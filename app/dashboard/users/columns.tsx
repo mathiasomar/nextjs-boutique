@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
@@ -18,14 +18,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import Link from "next/link";
-import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Role } from "@/generated/prisma/enums";
 
 export type User = {
   id: string;
-  avatar: string;
-  fullName: string;
+  image?: string | null;
+  name: string;
   email: string;
-  status: "active" | "inactive";
+  role: Role;
+  createdAt?: Date;
 };
 
 export const columns: ColumnDef<User>[] = [
@@ -52,25 +54,21 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "avatar",
-    header: "Avatar",
+    accessorKey: "image",
+    header: "Image",
     cell: ({ row }) => {
       const user = row.original;
 
       return (
-        <div className="relative h-9 w-9">
-          <Image
-            src={user.avatar}
-            alt={user.fullName}
-            fill
-            className="rounded-full object-center"
-          />
-        </div>
+        <Avatar>
+          <AvatarImage src={user.image || ""} />
+          <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
       );
     },
   },
   {
-    accessorKey: "fullName",
+    accessorKey: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Full Name" />
     ),
@@ -82,23 +80,8 @@ export const columns: ColumnDef<User>[] = [
     ),
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status");
-
-      return (
-        <div
-          className={cn(
-            `p-1 rounded-md w-max text-xs`,
-            status === "active" && "bg-green-500/40",
-            status === "inactive" && "bg-red-500/40"
-          )}
-        >
-          {status as string}
-        </div>
-      );
-    },
+    accessorKey: "role",
+    header: "Role",
   },
   {
     id: "actions",
@@ -122,7 +105,7 @@ export const columns: ColumnDef<User>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href={`/users/${user.id}`}>View customer</Link>
+              <Link href={`/dashboard/users/${user.id}`}>View customer</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

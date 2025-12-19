@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "./ui/sheet";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,150 +21,183 @@ import {
 } from "./ui/field";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+// import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
+// import { SelectValue } from "@radix-ui/react-select";
+import { useState } from "react";
+import { Alert, AlertTitle } from "./ui/alert";
+import { AlertCircleIcon, Plus } from "lucide-react";
+import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
+import { revalidateUser } from "@/app/actions/user";
 
 const formSchema = z.object({
-  fullName: z
+  name: z
     .string()
     .min(2, "Full name must be at least 2 characters!")
     .max(50, "Full name must be atmost 50 characters"),
-  email: z.string().email("Invalid email address!"),
-  phone: z
-    .string()
-    .min(10, "Phone must be atleast 10 digit")
-    .max(15, "Phone must not exceed 15 digit"),
-  address: z.string().min(2, "Address must be at least 2 characters!"),
-  city: z.string().min(2, "City must be at least 2 characters!"),
+  email: z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
+    message: "Invalid email address!",
+  }),
+  password: z.string().min(1, { message: "Password is required!" }),
+  // role: z.enum(["STAFF", "ADMIN"]),
 });
 
 const AddUser = () => {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>();
+  const [open, setOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (formData: z.infer<typeof formSchema>) => {
     // Do something with the form values.
-    console.log(data);
+    await authClient.signUp.email(
+      {
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+      },
+      {
+        onRequest: (ctx) => {
+          setLoading(true);
+        },
+        onSuccess: (ctx) => {
+          toast.success("User added successfully!");
+          form.reset();
+          setOpen(false);
+          revalidateUser();
+          setLoading(false);
+        },
+        onError: (ctx) => {
+          setError(ctx.error.message);
+          setLoading(false);
+        },
+      }
+    );
   };
   return (
-    <SheetContent>
-      <SheetHeader>
-        <SheetTitle className="mb-4">Add User</SheetTitle>
-        <SheetDescription asChild>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup>
-              <Controller
-                name="fullName"
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button>
+          <Plus />
+          Add User
+        </Button>
+      </SheetTrigger>
+      <SheetContent>
+        {error && (
+          <div className="my-2">
+            <Alert variant={"destructive"}>
+              <AlertCircleIcon />
+              <AlertTitle>{error}</AlertTitle>
+            </Alert>
+          </div>
+        )}
+        <SheetHeader>
+          <SheetTitle className="mb-4">Add User</SheetTitle>
+          <SheetDescription asChild>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FieldGroup>
+                <Controller
+                  name="name"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="name">Full Name</FieldLabel>
+                      <Input
+                        {...field}
+                        id="name"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Enter Full Name"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="email"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="email">Email</FieldLabel>
+                      <Input
+                        {...field}
+                        id="email"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Enter Email"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                      <FieldDescription>
+                        Only admin can see your email
+                      </FieldDescription>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="password"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="password">Password</FieldLabel>
+                      <Input
+                        {...field}
+                        id="password"
+                        type="password"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Enter Password"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                {/* <Controller
+                name="role"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
-                    <Input
-                      {...field}
-                      id="fullName"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Enter Full Name"
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                    <FieldDescription>Enter your full name</FieldDescription>
-                  </Field>
-                )}
-              />
-              <Controller
-                name="email"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input
-                      {...field}
-                      id="email"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Enter Email"
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                    <FieldDescription>
-                      Only admin can see your email
-                    </FieldDescription>
-                  </Field>
-                )}
-              />
-              <Controller
-                name="phone"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="phone">Phone</FieldLabel>
-                    <Input
-                      {...field}
-                      id="phone"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Enter Phone"
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                    <FieldDescription>
-                      Only admin can see your phone number
-                    </FieldDescription>
-                  </Field>
-                )}
-              />
-              <Controller
-                name="address"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="address">Address</FieldLabel>
-                    <Input
-                      {...field}
-                      id="address"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Enter Address"
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                    <FieldDescription>Enter your address</FieldDescription>
-                  </Field>
-                )}
-              />
-              <Controller
-                name="city"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="city">City</FieldLabel>
-                    <Input
-                      {...field}
-                      id="city"
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Enter City"
-                      autoComplete="off"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                    <FieldDescription>Enter your city</FieldDescription>
-                  </Field>
-                )}
-              />
-            </FieldGroup>
+                    <FieldLabel>Role</FieldLabel>
 
-            <Button type="submit" className="mt-6 w-full">
-              Submit
-            </Button>
-          </form>
-        </SheetDescription>
-      </SheetHeader>
-    </SheetContent>
+                    <Select onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={fieldState.invalid}>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="ADMIN">Admin</SelectItem>
+                        <SelectItem value="Staff">Staff</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              /> */}
+              </FieldGroup>
+
+              <Button disabled={loading} type="submit" className="mt-6 w-full">
+                {loading ? "Adding..." : "Add User"}
+              </Button>
+            </form>
+          </SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
   );
 };
 

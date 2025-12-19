@@ -1,3 +1,4 @@
+import { getuser } from "@/app/actions/user";
 import AppLineChart from "@/components/app-line-chart";
 import EditUser from "@/components/edit-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,22 +20,32 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { BadgeCheck, Candy, Citrus, Shield } from "lucide-react";
+import { formatDistance, subDays } from "date-fns";
 
-const SingleUserPage = () => {
+const SingleUserPage = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const { id } = await params;
+  const user = await getuser(id);
+  if (!user) return null;
   return (
     <div>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            <BreadcrumbLink href="/dasboard">Dashboard</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/users">Users</BreadcrumbLink>
+            <BreadcrumbLink href="/dashboard/users">Users</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Omar Mathias</BreadcrumbPage>
+            <BreadcrumbPage>
+              {(user as { name: string }).name || "Test User"}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -109,11 +120,16 @@ const SingleUserPage = () => {
           <div className="bg-primary-foreground p-4 rounded-lg space-y-2">
             <div className="flex items-center gap-2">
               <Avatar className="size-12">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>OM</AvatarFallback>
+                <AvatarImage src={(user as { image: string }).image || ""} />
+                <AvatarFallback>
+                  {(user as { name: string }).name.charAt(0).toUpperCase() ||
+                    "Test User"}
+                </AvatarFallback>
               </Avatar>
 
-              <h1 className="text-xl font-semibold">Omar Mathias</h1>
+              <h1 className="text-xl font-semibold">
+                {(user as { name: string }).name || "Test User"}
+              </h1>
             </div>
 
             <p className="text-sm text-muted-foreground">
@@ -126,12 +142,17 @@ const SingleUserPage = () => {
           <div className="bg-primary-foreground p-4 rounded-lg">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-semibold">User Information</h1>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button>Edit User</Button>
-                </SheetTrigger>
-                <EditUser />
-              </Sheet>
+              <EditUser
+                user={
+                  user as {
+                    id: string;
+                    name: string;
+                    email: string;
+                    role: "ADMIN" | "STAFF";
+                    createdAt: Date;
+                  }
+                }
+              />
             </div>
             <div className="space-y-4 mt-4">
               <div className="flex flex-col gap-2 mb-8">
@@ -142,27 +163,28 @@ const SingleUserPage = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold">Full Name:</span>
-                <span>Omar Mathias</span>
+                <span>{(user as { name: string }).name || "Test User"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold">Email:</span>
-                <span>omar@gmail.com</span>
+                <span>
+                  {(user as { email: string }).email || "someone@gmail.com"}
+                </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold">Phone:</span>
-                <span>+1 234 5678</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">Address:</span>
-                <span>123 Main St, Anytown, USA</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold">City:</span>
-                <span>Anytown</span>
+                <span className="font-bold">Role:</span>
+                <span>{(user as { role: string }).role || "Test User"}</span>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-4">
-              Joined on 2025.01.01
+              Joined{" "}
+              {formatDistance(
+                subDays((user as { createdAt: Date }).createdAt, 3),
+                new Date(),
+                {
+                  addSuffix: true,
+                }
+              )}
             </p>
           </div>
         </div>

@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/generated/prisma/client";
 import { InventoryType } from "@/generated/prisma/enums";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -45,26 +46,28 @@ export const getProducts = async () => {
   }
 };
 
-export const createProduct = async (formData: FormData) => {
+export const createProduct = async (
+  formData: Prisma.ProductUncheckedCreateInput
+) => {
   const session = await auth.api.getSession({
     headers: await headers(), // you need to pass the headers object.
   });
   if (!session?.user) throw new Error("Unauthorized");
 
   const validatedData = productSchema.safeParse({
-    sku: formData.get("sku"),
-    name: formData.get("name"),
-    description: formData.get("description"),
-    categoryId: formData.get("categoryId"),
-    brand: formData.get("brand"),
-    price: formData.get("price"),
-    costPrice: formData.get("costPrice"),
-    size: formData.get("size"),
-    color: formData.get("color"),
-    material: formData.get("material"),
-    currentStock: formData.get("currentStock"),
-    minStockLevel: formData.get("minStockLevel"),
-    images: formData.getAll("images"),
+    sku: formData.sku,
+    name: formData.name,
+    description: formData.description,
+    categoryId: formData.categoryId,
+    brand: formData.brand,
+    price: formData.price,
+    costPrice: formData.costPrice,
+    size: formData.size,
+    color: formData.color,
+    material: formData.material,
+    currentStock: formData.currentStock,
+    minStockLevel: formData.minStockLevel,
+    images: formData.images,
   });
 
   if (!validatedData.success) {
@@ -113,26 +116,29 @@ export const createProduct = async (formData: FormData) => {
   }
 };
 
-export const updateProduct = async (id: string, formData: FormData) => {
+export const updateProduct = async (
+  id: string,
+  formData: Prisma.ProductUncheckedUpdateInput
+) => {
   const session = await auth.api.getSession({
     headers: await headers(), // you need to pass the headers object.
   });
   if (!session?.user) throw new Error("Unauthorized");
 
   const validatedData = productSchema.partial().safeParse({
-    sku: formData.get("sku"),
-    name: formData.get("name"),
-    description: formData.get("description"),
-    categoryId: formData.get("categoryId"),
-    brand: formData.get("brand"),
-    price: formData.get("price"),
-    costPrice: formData.get("costPrice"),
-    size: formData.get("size"),
-    color: formData.get("color"),
-    material: formData.get("material"),
-    currentStock: formData.get("currentStock"),
-    minStockLevel: formData.get("minStockLevel"),
-    images: formData.getAll("images"),
+    sku: formData.sku,
+    name: formData.name,
+    description: formData.description,
+    categoryId: formData.categoryId,
+    brand: formData.brand,
+    price: formData.price,
+    costPrice: formData.costPrice,
+    size: formData.size,
+    color: formData.color,
+    material: formData.material,
+    currentStock: formData.currentStock,
+    minStockLevel: formData.minStockLevel,
+    images: formData.images,
   });
 
   if (!validatedData.success) {

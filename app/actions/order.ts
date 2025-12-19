@@ -8,8 +8,11 @@ import { updateStock } from "./product";
 import { revalidatePath } from "next/cache";
 import { OrderStatus, PaymentMethod } from "@/generated/prisma/enums";
 import { Item } from "../types";
+import { Prisma } from "@/generated/prisma/client";
 
-export const createOrder = async (formData: FormData) => {
+export const createOrder = async (
+  formData: Prisma.OrderUncheckedCreateInput
+) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -21,8 +24,8 @@ export const createOrder = async (formData: FormData) => {
       .toString(36)
       .substr(2, 4)}`;
 
-    const customerId = formData.get("customerId") as string;
-    const items = JSON.parse(formData.get("items") as string);
+    const customerId = formData.customerId as string;
+    const items = JSON.parse(formData.items as string);
 
     // Calculate totals
     const subtotal = items.reduce(

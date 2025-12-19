@@ -23,6 +23,28 @@ const productSchema = z.object({
   images: z.array(z.string()).optional(),
 });
 
+export const getProducts = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        category: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return products;
+  } catch (error) {
+    console.error("Create product error:", error);
+    return { error: "Failed to create product" };
+  }
+};
+
 export const createProduct = async (formData: FormData) => {
   const session = await auth.api.getSession({
     headers: await headers(), // you need to pass the headers object.

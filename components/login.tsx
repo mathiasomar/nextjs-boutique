@@ -12,6 +12,7 @@ import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 const formSchema = z.object({
   email: z
@@ -60,8 +61,16 @@ const LoginPage = () => {
     <div className="w-1/3">
       <Card>
         <CardHeader>
-          <CardTitle className="flex flex-col items-center justify-between gap-2">
-            <h1 className="text-3xl font-bold">WELCOME BACK!</h1>
+          <CardTitle className="flex flex-col items-center justify-between gap-4">
+            <Image
+              src="/logo.png"
+              alt="logo"
+              width={150}
+              height={150}
+              priority
+              className=""
+            />
+            <h1 className="text-3xl font-bold">NAJTRENDS BOUTIQUE</h1>
             <p>Login to your account</p>
           </CardTitle>
         </CardHeader>

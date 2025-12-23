@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { ProductFilters } from "../types";
 // import { z } from "zod";
 
 // const productSchema = z.object({
@@ -25,14 +26,50 @@ import { headers } from "next/headers";
 //   images: z.record(z.enum(colors), z.string()),
 // });
 
-export const getProducts = async () => {
+export const getProducts = async (filters: ProductFilters = {}) => {
   const session = await auth.api.getSession({
     headers: await headers(), // you need to pass the headers object.
   });
   if (!session?.user) throw new Error("Unauthorized");
 
+  const { search, stock, isActive = true } = filters;
+
+  const where: Prisma.ProductWhereInput = {
+    isActive,
+  };
+
+  // Text search
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { sku: { contains: search, mode: "insensitive" } },
+      { brand: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  // Price range
+  // if (minPrice !== undefined || maxPrice !== undefined) {
+  //   where.price = {}
+  //   if (minPrice !== undefined) {
+  //     where.price.gte = minPrice
+  //   }
+  //   if (maxPrice !== undefined) {
+  //     where.price.lte = maxPrice
+  //   }
+  // }
+
+  // Stock filters
+  if (stock !== undefined && stock !== "all") {
+    if (stock == "inStock") {
+      where.currentStock = { gt: 0 };
+    } else {
+      where.currentStock = 0;
+    }
+  }
+
   try {
     const products = await prisma.product.findMany({
+      where,
       include: {
         category: true,
       },

@@ -68,3 +68,10 @@ export type EditInventoryType = {
   type: InventoryType;
   reason?: string;
 };
+
+export interface ProductFilters {
+  search?: string;
+  stock?: string;
+  isActive?: boolean;
+  sortOrder?: "asc" | "desc";
+}

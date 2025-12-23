@@ -78,6 +78,12 @@ export const columns: ColumnDef<Product>[] = [
     ),
   },
   {
+    accessorKey: "currentStock",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Current Stock" />
+    ),
+  },
+  {
     accessorKey: "price",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Product Price" />
@@ -98,15 +104,19 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    accessorKey: "description",
-    header: "Description",
+    accessorKey: "lowStockAlert",
+    header: "Stock Status",
     cell: ({ row }) => {
       const product = row.original;
       return (
         <div className={cn("max-w-sm truncate")}>
-          {product.description!.length > 10
-            ? product.description!.slice(0, 100) + "..."
-            : product.description ?? "No description available"}
+          {product.lowStockAlert ? (
+            <span className="rounded-full px-2 py-1 bg-red-600 text-white">
+              Out of stock
+            </span>
+          ) : (
+            "☑️"
+          )}
         </div>
       );
     },

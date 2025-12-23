@@ -14,9 +14,26 @@ import AddProduct from "@/components/add-product";
 import { getCategories } from "@/app/actions/category";
 import { getProducts } from "@/app/actions/product";
 import { Product } from "@/generated/prisma/client";
+import SearchProduct from "@/components/search-product";
+import FilterProduct from "@/components/filter-product";
 
-const ProductsPage = async () => {
-  const productsResult = await getProducts();
+type FilterProps = {
+  search?: string;
+  stock?: string;
+  isActive?: boolean;
+};
+
+const ProductsPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<FilterProps>;
+}) => {
+  const { search, stock, isActive } = await searchParams;
+  const productsResult = await getProducts({
+    search,
+    stock,
+    isActive,
+  });
   const categoryResult = await getCategories();
   const categories = "error" in categoryResult ? [] : categoryResult;
 
@@ -49,6 +66,14 @@ const ProductsPage = async () => {
           <AddCategory />
           <ViewCategories />
           <AddProduct categories={categories} />
+        </div>
+      </div>
+      <div className="flex items-center justify-between flex-col md:flex-row gap-4 mb-8 px-4 py-2 bg-secondary roundedn-md">
+        {/* Search Bar */}
+        <SearchProduct />
+        <div className="flex items-center gap-4">
+          {/* Filters */}
+          <FilterProduct />
         </div>
       </div>
       <DataTable columns={columns} data={products} />

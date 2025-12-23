@@ -1,6 +1,5 @@
 // prisma/seed.ts
-import bcrypt from "bcryptjs";
-import { PrismaClient, Role } from "../generated/prisma/client";
+import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -73,10 +72,10 @@ async function main() {
         categoryId: categories[0].id,
         price: 299.99,
         costPrice: 150.0,
-        size: "M",
-        color: "Black",
+        size: ["M"],
+        color: ["Black"],
         currentStock: 10,
-        images: ["/products/gown.jpg"],
+        images: { Black: "/products/evening_gown_black.jpg" },
       },
     }),
     prisma.product.create({
@@ -87,10 +86,10 @@ async function main() {
         categoryId: categories[1].id,
         price: 89.99,
         costPrice: 40.0,
-        size: "S",
-        color: "White",
+        size: ["S"],
+        color: ["White"],
         currentStock: 25,
-        images: ["/products/blouse.jpg"],
+        images: { White: "/products/blouse.jpg" },
       },
     }),
   ]);

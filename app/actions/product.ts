@@ -1,28 +1,29 @@
 "use server";
 
+// import { colors, sizes } from "@/constants/product";
 import { Prisma } from "@/generated/prisma/client";
 import { InventoryType } from "@/generated/prisma/enums";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { z } from "zod";
+// import { z } from "zod";
 
-const productSchema = z.object({
-  sku: z.string().min(3),
-  name: z.string().min(2),
-  description: z.string().optional(),
-  categoryId: z.string(),
-  brand: z.string().optional(),
-  price: z.coerce.number().positive(),
-  costPrice: z.coerce.number().positive(),
-  size: z.string().optional(),
-  color: z.string().optional(),
-  material: z.string().optional(),
-  currentStock: z.coerce.number().int().min(0),
-  minStockLevel: z.coerce.number().int().min(0),
-  images: z.array(z.string()).optional(),
-});
+// const productSchema = z.object({
+//   sku: z.string().min(3),
+//   name: z.string().min(2),
+//   description: z.string().optional(),
+//   categoryId: z.string(),
+//   brand: z.string().optional(),
+//   price: z.coerce.number().positive(),
+//   costPrice: z.coerce.number().positive(),
+//   size: z.array(z.enum(sizes)),
+//   color: z.array(z.enum(colors)),
+//   material: z.string().optional(),
+//   currentStock: z.coerce.number().int().min(0),
+//   minStockLevel: z.coerce.number().int().min(0),
+//   images: z.record(z.enum(colors), z.string()),
+// });
 
 export const getProducts = async () => {
   const session = await auth.api.getSession({
@@ -39,7 +40,46 @@ export const getProducts = async () => {
         createdAt: "desc",
       },
     });
-    return products;
+
+    // Transform Decimal fields to plain numbers
+    return products.map((product) => ({
+      ...product,
+      price: product.price.toNumber(),
+      costPrice: product.costPrice.toNumber(),
+    }));
+  } catch (error) {
+    console.error("Create product error:", error);
+    return { error: "Failed to create product" };
+  }
+};
+
+export const getProductById = async (id: string) => {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        inventoryLogs: {
+          include: {
+            user: { select: { id: true, name: true } },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+    if (!product) return null;
+
+    // Transform Decimal fields to plain numbers
+    return {
+      ...product,
+      price: product.price.toNumber(),
+      costPrice: product.costPrice.toNumber(),
+    };
   } catch (error) {
     console.error("Create product error:", error);
     return { error: "Failed to create product" };
@@ -54,30 +94,51 @@ export const createProduct = async (
   });
   if (!session?.user) throw new Error("Unauthorized");
 
-  const validatedData = productSchema.safeParse({
-    sku: formData.sku,
-    name: formData.name,
-    description: formData.description,
-    categoryId: formData.categoryId,
-    brand: formData.brand,
-    price: formData.price,
-    costPrice: formData.costPrice,
-    size: formData.size,
-    color: formData.color,
-    material: formData.material,
-    currentStock: formData.currentStock,
-    minStockLevel: formData.minStockLevel,
-    images: formData.images,
-  });
-
-  if (!validatedData.success) {
-    return { error: "Invalid product data" };
+  if (
+    !formData.color ||
+    !Array.isArray(formData.color) ||
+    formData.color.length === 0
+  ) {
+    return { error: "At least one color is required" };
   }
+
+  if (!formData.images || typeof formData.images !== "object") {
+    return { error: "Images object is required" };
+  }
+
+  const missingColors = formData.color.filter(
+    (col) => !(col in (formData.images as Record<string, unknown>))
+  );
+  if (missingColors.length > 0) {
+    return {
+      error: `Images missing for color(s): ${missingColors.join(", ")}`,
+    };
+  }
+
+  // const validatedData = productSchema.safeParse({
+  //   sku: formData.sku,
+  //   name: formData.name,
+  //   description: formData.description,
+  //   categoryId: formData.categoryId,
+  //   brand: formData.brand,
+  //   price: formData.price,
+  //   costPrice: formData.costPrice,
+  //   material: formData.material,
+  //   currentStock: formData.currentStock,
+  //   minStockLevel: formData.minStockLevel,
+  // });
+
+  // if (!validatedData.success) {
+  //   return { error: "Invalid product data" };
+  // }
 
   try {
     const product = await prisma.product.create({
       data: {
-        ...validatedData.data,
+        ...formData,
+        size: formData.size as string[],
+        color: formData.color as string[],
+        images: formData.images as Record<string, string>,
         createdBy: session.user.id,
         updatedBy: session.user.id,
       },
@@ -89,9 +150,9 @@ export const createProduct = async (
         id: `inv_${Date.now()}`,
         productId: product.id,
         type: "PURCHASE",
-        quantity: validatedData.data.currentStock,
+        quantity: formData.currentStock || 0,
         previousStock: 0,
-        newStock: validatedData.data.currentStock,
+        newStock: formData.currentStock || 0,
         reason: "Initial stock",
         userId: session.user.id,
       },
@@ -109,7 +170,14 @@ export const createProduct = async (
     });
 
     revalidatePath("/dashboard/products");
-    return { success: true, product };
+    return {
+      success: true,
+      product: {
+        ...product,
+        price: product.price.toNumber(),
+        costPrice: product.costPrice.toNumber(),
+      },
+    };
   } catch (error) {
     console.error("Create product error:", error);
     return { error: "Failed to create product" };
@@ -125,31 +193,31 @@ export const updateProduct = async (
   });
   if (!session?.user) throw new Error("Unauthorized");
 
-  const validatedData = productSchema.partial().safeParse({
-    sku: formData.sku,
-    name: formData.name,
-    description: formData.description,
-    categoryId: formData.categoryId,
-    brand: formData.brand,
-    price: formData.price,
-    costPrice: formData.costPrice,
-    size: formData.size,
-    color: formData.color,
-    material: formData.material,
-    currentStock: formData.currentStock,
-    minStockLevel: formData.minStockLevel,
-    images: formData.images,
-  });
+  // const validatedData = productSchema.partial().safeParse({
+  //   sku: formData.sku,
+  //   name: formData.name,
+  //   description: formData.description,
+  //   categoryId: formData.categoryId,
+  //   brand: formData.brand,
+  //   price: formData.price,
+  //   costPrice: formData.costPrice,
+  //   size: formData.size,
+  //   color: formData.color,
+  //   material: formData.material,
+  //   currentStock: formData.currentStock,
+  //   minStockLevel: formData.minStockLevel,
+  //   images: formData.images,
+  // });
 
-  if (!validatedData.success) {
-    return { error: "Invalid product data" };
-  }
+  // if (!validatedData.success) {
+  //   return { error: "Invalid product data" };
+  // }
 
   try {
     const product = await prisma.product.update({
       where: { id },
       data: {
-        ...validatedData.data,
+        ...formData,
         updatedBy: session.user.id,
       },
     });
@@ -167,7 +235,14 @@ export const updateProduct = async (
 
     revalidatePath("/dashboard/products");
     revalidatePath(`/dashboard/products/${id}`);
-    return { success: true, product };
+    return {
+      success: true,
+      product: {
+        ...product,
+        price: product.price.toNumber(),
+        costPrice: product.costPrice.toNumber(),
+      },
+    };
   } catch (error) {
     console.error("Update product error:", error);
     return { error: "Failed to update product" };
@@ -268,4 +343,18 @@ export const updateStock = async (
     console.error("Update stock error:", error);
     return { error: "Failed to update stock" };
   }
+};
+
+export const deleteManyProducts = async (ids: string[]) => {
+  if (!ids.length) return;
+
+  await prisma.product.deleteMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+  });
+
+  revalidatePath("/dashboard/products");
 };

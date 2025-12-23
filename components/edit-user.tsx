@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { updateUser } from "@/app/actions/user";
-import { EditUserProps, UserProps } from "@/app/types";
+import { UserProps } from "@/app/types";
 
 const formSchema = z.object({
   name: z

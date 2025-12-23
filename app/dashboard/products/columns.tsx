@@ -19,17 +19,7 @@ import {
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import Link from "next/link";
 import Image from "next/image";
-
-export type Product = {
-  id: string | number;
-  price: number;
-  name: string;
-  shortDescription: string;
-  description: string;
-  sizes: string[];
-  colors: string[];
-  images: Record<string, string>;
-};
+import { Product } from "@/generated/prisma/client";
 
 export const columns: ColumnDef<Product>[] = [
   {
@@ -63,14 +53,23 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div className="relative h-9 w-9">
           <Image
-            src={product.images[product.colors[0]]}
+            src={
+              (product.images as Record<string, string>)?.[product.color[0]] ||
+              "/products/1g.p1"
+            }
             alt={product.name}
             fill
-            className="rounded object-center"
+            className="rounded object-cover"
           />
         </div>
       );
     },
+  },
+  {
+    accessorKey: "sku",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Product SKU" />
+    ),
   },
   {
     accessorKey: "name",
@@ -83,10 +82,34 @@ export const columns: ColumnDef<Product>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Product Price" />
     ),
+    cell: ({ row }) => {
+      const product = row.original;
+      return <>Ksh.{product.price.toFixed(2)}</>;
+    },
   },
   {
-    accessorKey: "shortDescription",
+    accessorKey: "costPrice",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Product Cost Price" />
+    ),
+    cell: ({ row }) => {
+      const product = row.original;
+      return <>Ksh.{product.costPrice.toFixed(2)}</>;
+    },
+  },
+  {
+    accessorKey: "description",
     header: "Description",
+    cell: ({ row }) => {
+      const product = row.original;
+      return (
+        <div className={cn("max-w-sm truncate")}>
+          {product.description!.length > 10
+            ? product.description!.slice(0, 100) + "..."
+            : product.description ?? "No description available"}
+        </div>
+      );
+    },
   },
   {
     id: "actions",
@@ -112,7 +135,9 @@ export const columns: ColumnDef<Product>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href={`/products/${product.id}`}>View product</Link>
+              <Link href={`/dashboard/products/${product.id}`}>
+                View product
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

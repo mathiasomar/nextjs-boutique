@@ -58,7 +58,12 @@ export function DataTable<TData, TValue>({
   const handleDelete = async () => {
     try {
       setLoading(true);
-      await deleteManyProducts(selectedIds);
+      const result = await deleteManyProducts(selectedIds);
+      if (result && "error" in result && result.error) {
+        toast.error(result.error);
+        setLoading(false);
+        return;
+      }
       setRowSelection({});
       toast.success(`${selectedIds.length} Product(s) deleted successfully!`);
     } catch (error) {

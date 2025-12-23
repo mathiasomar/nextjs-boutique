@@ -302,6 +302,11 @@ export const deleteProduct = async (id: string) => {
       return { error: "Cannot delete product with existing orders" };
     }
 
+    // Delete inventory logs first
+    await prisma.inventoryLog.deleteMany({
+      where: { productId: id },
+    });
+
     await prisma.product.delete({
       where: { id },
     });
@@ -385,6 +390,22 @@ export const updateStock = async (
 export const deleteManyProducts = async (ids: string[]) => {
   if (!ids.length) return;
 
+  // Check if any products have orders
+  const orderItems = await prisma.orderItem.count({
+    where: { productId: { in: ids } },
+  });
+
+  if (orderItems > 0) {
+    return { error: "Cannot delete products with existing orders" };
+  }
+
+  // Delete inventory logs first
+  await prisma.inventoryLog.deleteMany({
+    where: {
+      productId: { in: ids },
+    },
+  });
+
   await prisma.product.deleteMany({
     where: {
       id: {
@@ -394,4 +415,5 @@ export const deleteManyProducts = async (ids: string[]) => {
   });
 
   revalidatePath("/dashboard/products");
+  return { success: true };
 };

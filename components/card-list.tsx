@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
+import { Product } from "@/generated/prisma/client";
+import prisma from "@/lib/prisma";
 
 const popularProducts = [
   {
@@ -120,20 +122,37 @@ const latestTransactions = [
   },
 ];
 
-const CardList = ({ title }: { title: string }) => {
+const CardList = async ({ title }: { title: string }) => {
+  const [products] = await Promise.all([
+    // Fetch popular products from your data source
+
+    prisma.product.findMany({
+      where: {
+        isActive: true,
+      },
+      take: 5,
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+  ]);
   return (
     <div className="">
       <h1 className="text-lg font-medium mb-6">{title}</h1>
       <div className="flex flex-col gap-2">
-        {title === "Popular Products"
-          ? popularProducts.map((item) => (
+        {title === "Recent Products"
+          ? products.map((item) => (
               <Card
                 key={item.id}
                 className="flex-row items-center justify-between gap-4 p-4"
               >
                 <div className="w-12 h-12 rounded-sm relative overflow-hidden">
                   <Image
-                    src={Object.values(item.images)[0] || ""}
+                    src={
+                      (item.images as Record<string, string>)?.[
+                        item.color[0]
+                      ] || ""
+                    }
                     alt={item.name}
                     fill
                     className="object-cover"
@@ -145,7 +164,7 @@ const CardList = ({ title }: { title: string }) => {
                   </CardTitle>
                 </CardContent>
                 <CardFooter className="p-0">
-                  ${item.price.toFixed(2)}
+                  Ksh{item.price.toFixed(2)}
                 </CardFooter>
               </Card>
             ))

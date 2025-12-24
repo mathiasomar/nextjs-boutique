@@ -293,7 +293,7 @@ model OrderItem {
 
 model InventoryLog {
   id            String        @id @default(cuid())
-  product       Product       @relation(fields: [productId], references: [id])
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId     String
   type          InventoryType
   quantity      Int

@@ -55,7 +55,7 @@ export const columns: ColumnDef<Product>[] = [
           <Image
             src={
               (product.images as Record<string, string>)?.[product.color[0]] ||
-              "/products/1g.p1"
+              "/noimage.png"
             }
             alt={product.name}
             fill

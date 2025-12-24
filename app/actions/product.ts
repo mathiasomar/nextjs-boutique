@@ -303,9 +303,9 @@ export const deleteProduct = async (id: string) => {
     }
 
     // Delete inventory logs first
-    await prisma.inventoryLog.deleteMany({
-      where: { productId: id },
-    });
+    // await prisma.inventoryLog.deleteMany({
+    //   where: { productId: id },
+    // });
 
     await prisma.product.delete({
       where: { id },

@@ -1,17 +1,18 @@
+"use client";
+
 import {
   Home,
-  Plus,
+  LineChart,
   Settings,
   Shirt,
   ShoppingBasket,
-  User,
   User2,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
@@ -23,11 +24,7 @@ import {
 } from "./ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
-import { Sheet, SheetTrigger } from "./ui/sheet";
-import AddOrder from "./add-order";
-import AddUser from "./add-user";
-import AddCategory from "./add-category";
-import AddProduct from "./add-product";
+import { usePathname } from "next/navigation";
 
 const items = [
   {
@@ -46,9 +43,19 @@ const items = [
     icon: Shirt,
   },
   {
+    title: "Customers",
+    url: "/dashboard/customers",
+    icon: Users,
+  },
+  {
     title: "Orders",
     url: "/dashboard/orders",
     icon: ShoppingBasket,
+  },
+  {
+    title: "Analytics",
+    url: "/dashboard/analytics",
+    icon: LineChart,
   },
   {
     title: "Settings",
@@ -58,6 +65,8 @@ const items = [
 ];
 
 const AppSidebar = () => {
+  const pathname = usePathname();
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-4">
@@ -80,7 +89,15 @@ const AppSidebar = () => {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton tooltip={item.title} asChild>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    asChild
+                    isActive={
+                      pathname === item.url ||
+                      (item.url !== "/dashboard" &&
+                        pathname.startsWith(item.url))
+                    }
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>

@@ -84,7 +84,7 @@ export const columns: ColumnDef<Customer>[] = [
 
       return (
         <div className="flex gap-4 items-center">
-          <EditCustomer customerId={customer.id} />
+          <EditCustomer customer={customer} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">

@@ -28,8 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { updateUser } from "@/app/actions/user";
-import { UserProps } from "@/app/types";
+import { useUpdateUser, useUser } from "@/hooks/use-user";
 
 const formSchema = z.object({
   name: z
@@ -39,31 +38,49 @@ const formSchema = z.object({
   role: z.enum(["STAFF", "ADMIN"]),
 });
 
-const EditUser = ({ user }: UserProps) => {
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>();
+interface EditUserSheetProps {
+  userId: string;
+}
+
+const EditUser = ({ userId }: EditUserSheetProps) => {
   const [open, setOpen] = useState(false);
-  const id = (user as { id: string }).id;
+  const updateUserMutation = useUpdateUser();
+
+  const { data: user, isLoading } = useUser(userId as string);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: user.name,
-      role: user.role,
+      name: isLoading ? "" : (user as { name: string }).name,
+      role: isLoading ? "STAFF" : (user as { role: "STAFF" | "ADMIN" }).role,
     },
   });
 
   const onSubmit = async (formData: z.infer<typeof formSchema>) => {
     // Do something with the form values.
+    // try {
+    //   setupdateLoading(true);
+    //   await updateUser(userId, formData);
+    //   toast.success("User updated successfully!");
+    //   setOpen(false);
+    // } catch (error) {
+    //   setUpdateError(error as string);
+    //   setupdateLoading(false);
+    // } finally {
+    //   setupdateLoading(false);
+    // }
     try {
-      setLoading(true);
-      await updateUser(id, formData);
-      toast.success("User updated successfully!");
-      setOpen(false);
+      updateUserMutation.mutateAsync(
+        { id: userId, ...formData },
+        {
+          onSuccess: () => {
+            toast.success("User updated successfully!");
+            setOpen(false);
+          },
+        }
+      );
     } catch (error) {
-      setError(error as string);
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      toast.error(error as string);
     }
   };
   return (
@@ -74,11 +91,11 @@ const EditUser = ({ user }: UserProps) => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        {error && (
+        {(updateUserMutation.error as string) && (
           <div className="my-2">
             <Alert variant={"destructive"}>
               <AlertCircleIcon />
-              <AlertTitle>{error}</AlertTitle>
+              <AlertTitle>{String(updateUserMutation.error)}</AlertTitle>
             </Alert>
           </div>
         )}
@@ -123,7 +140,7 @@ const EditUser = ({ user }: UserProps) => {
 
                         <SelectContent>
                           <SelectItem value="ADMIN">Admin</SelectItem>
-                          <SelectItem value="Staff">Staff</SelectItem>
+                          <SelectItem value="STAFF">Staff</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -135,8 +152,12 @@ const EditUser = ({ user }: UserProps) => {
                 />
               </FieldGroup>
 
-              <Button disabled={loading} type="submit" className="mt-6 w-full">
-                {loading ? "Updating..." : "Update User"}
+              <Button
+                disabled={updateUserMutation.isPending}
+                type="submit"
+                className="mt-6 w-full"
+              >
+                {updateUserMutation.isPending ? "Updating..." : "Update User"}
               </Button>
             </form>
           </SheetDescription>

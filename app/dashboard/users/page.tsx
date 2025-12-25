@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Breadcrumb,
   BreadcrumbSeparator,
@@ -8,12 +10,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import { columns, User } from "./columns";
 import { DataTable } from "./data-table";
-import { getUsers } from "@/app/actions/user";
 import AddUser from "@/components/add-user";
+import { useUsers } from "@/hooks/use-user";
+import { DataTableSkeleton } from "@/components/loaders/data-table-skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircleIcon } from "lucide-react";
 
-const UsersPage = async () => {
-  // const data = await getData();
-  const users = await getUsers();
+const UsersPage = () => {
+  const { data: users, isLoading, error } = useUsers();
   return (
     <div>
       <Breadcrumb className="mb-8">
@@ -31,7 +35,17 @@ const UsersPage = async () => {
         <h1 className="font-semiboldnn">All Users</h1>
         <AddUser />
       </div>
-      <DataTable columns={columns} data={users as User[]} />
+      {isLoading ? (
+        <DataTableSkeleton />
+      ) : error ? (
+        <Alert>
+          <AlertCircleIcon />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error as string}</AlertDescription>
+        </Alert>
+      ) : (
+        <DataTable columns={columns} data={users as User[]} />
+      )}
     </div>
   );
 };

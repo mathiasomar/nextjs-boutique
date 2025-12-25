@@ -24,8 +24,8 @@ import { DataTablePagination } from "@/components/data-table-pagination";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { deleteManyUsers } from "@/app/actions/user";
 import toast from "react-hot-toast";
+import { useDeleteUser } from "@/hooks/use-user";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,7 +38,8 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [loading, setLoading] = useState(false);
+  const deleteUsersMutation = useDeleteUser();
+
   const table = useReactTable({
     data,
     columns,
@@ -58,18 +59,29 @@ export function DataTable<TData, TValue>({
     .rows.map((row) => (row.original as { id: string }).id);
 
   const handleDelete = async () => {
+    // try {
+    //   setLoading(true);
+    //   await deleteManyUsers(selectedIds);
+    //   setRowSelection({});
+    //   toast.success(`${selectedIds.length} User(s) deleted successfully!`);
+    // } catch (error) {
+    //   toast.error(
+    //     error instanceof Error ? error.message : "Failed to delete user(s)"
+    //   );
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
+
     try {
-      setLoading(true);
-      await deleteManyUsers(selectedIds);
-      setRowSelection({});
-      toast.success(`${selectedIds.length} User(s) deleted successfully!`);
+      deleteUsersMutation.mutateAsync(selectedIds, {
+        onSuccess: () => {
+          setRowSelection({});
+          toast.success(`${selectedIds.length} User(s) deleted successfully!`);
+        },
+      });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete user(s)"
-      );
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      toast.error(error as string);
     }
   };
 
@@ -81,7 +93,7 @@ export function DataTable<TData, TValue>({
             className="text-sm"
             variant={"destructive"}
             onClick={handleDelete}
-            disabled={loading}
+            disabled={deleteUsersMutation.isPending}
           >
             <Trash2 className="w-4 h-4" />
             Delete selected ({selectedIds.length}) User(s)

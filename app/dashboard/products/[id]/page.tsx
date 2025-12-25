@@ -144,6 +144,19 @@ const ProductPage = async ({ params }: { params: Promise<{ id: string }> }) => {
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                <span className="font-bold">Price:</span>
+                <span>
+                  Ksh.{(product as { price: number }).price.toFixed(2) || 0}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Cost Price:</span>
+                <span>
+                  Ksh.
+                  {(product as { costPrice: number }).costPrice.toFixed(2) || 0}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
                 <span className="font-bold">Sizes:</span>
                 <span>
                   {(product as { size: string[] }).size

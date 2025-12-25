@@ -2,7 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { EditUserProps } from "../types";
+// import { EditUserProps } from "../types";
+import { Prisma } from "@/generated/prisma/client";
 
 export const getUsers = async () => {
   try {
@@ -64,7 +65,7 @@ export const getuser = async (id: string) => {
   }
 };
 
-export const updateUser = async (id: string, data: EditUserProps) => {
+export const updateUser = async (id: string, data: Prisma.UserUpdateInput) => {
   const user = await prisma.user.update({
     where: { id },
     data,

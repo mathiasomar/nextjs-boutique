@@ -14,8 +14,8 @@ import AddProduct from "@/components/add-product";
 import { getCategories } from "@/app/actions/category";
 import { getProducts } from "@/app/actions/product";
 import { Product } from "@/generated/prisma/client";
-import SearchProduct from "@/components/search-product";
 import FilterProduct from "@/components/filter-product";
+import Search from "@/components/search";
 
 type FilterProps = {
   search?: string;
@@ -70,7 +70,7 @@ const ProductsPage = async ({
       </div>
       <div className="flex items-center justify-between flex-col md:flex-row gap-4 mb-8 px-4 py-2 bg-secondary roundedn-md">
         {/* Search Bar */}
-        <SearchProduct />
+        <Search />
         <div className="flex items-center gap-4">
           {/* Filters */}
           <FilterProduct />

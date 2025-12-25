@@ -75,3 +75,8 @@ export interface ProductFilters {
   isActive?: boolean;
   sortOrder?: "asc" | "desc";
 }
+
+export interface CustomerFilters {
+  search?: string;
+  type?: "REGULAR" | "VIP" | "WHOLESALE";
+}

@@ -10,7 +10,7 @@ import {
 import { useState } from "react";
 import { Button } from "./ui/button";
 
-const SearchProduct = () => {
+const Search = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -54,4 +54,4 @@ const SearchProduct = () => {
   );
 };
 
-export default SearchProduct;
+export default Search;

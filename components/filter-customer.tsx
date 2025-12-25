@@ -10,8 +10,8 @@ import {
 } from "./ui/select";
 import { useState } from "react";
 
-const FilterProduct = () => {
-  const [stock, setStock] = useState<string>("");
+const FilterCustomer = () => {
+  const [type, setType] = useState<string>("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -19,34 +19,35 @@ const FilterProduct = () => {
   const handleFilter = (filter: string) => {
     if (filter === "all") {
       const params = new URLSearchParams(searchParams);
-      params.delete("stock");
+      params.delete("type");
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
       return;
     }
     const params = new URLSearchParams(searchParams);
-    params.set("stock", filter || "all");
+    params.set("type", filter || "all");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
   return (
     <div className="flex items-center gap-4">
       <Select
         onValueChange={(value) => {
-          setStock(value);
+          setType(value);
           handleFilter(value);
         }}
-        defaultValue={stock}
+        defaultValue={type}
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Filter Products" />
+          <SelectValue placeholder="Filter Customers" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All</SelectItem>
-          <SelectItem value="inStock">In Stock</SelectItem>
-          <SelectItem value="lowStock">Low Stock</SelectItem>
+          <SelectItem value="REGULAR">Regular</SelectItem>
+          <SelectItem value="VIP">VIP</SelectItem>
+          <SelectItem value="WHOLESALE">Wholesale</SelectItem>
         </SelectContent>
       </Select>
     </div>
   );
 };
 
-export default FilterProduct;
+export default FilterCustomer;

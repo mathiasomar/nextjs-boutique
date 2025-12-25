@@ -59,7 +59,7 @@ export const getProducts = async (filters: ProductFilters = {}) => {
   // }
 
   // Stock filters
-  if (stock !== undefined && stock !== "all") {
+  if (stock !== undefined) {
     if (stock == "inStock") {
       where.currentStock = { gt: 0 };
     } else {

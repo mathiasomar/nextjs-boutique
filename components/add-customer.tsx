@@ -13,16 +13,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Resolver } from "react-hook-form";
 import * as z from "zod";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "./ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
 import {
   Select,
   SelectContent,
@@ -31,59 +24,52 @@ import {
   SelectValue,
 } from "./ui/select";
 import { ScrollArea } from "./ui/scroll-area";
-import { useState } from "react";
-import { AlertCircleIcon, Edit } from "lucide-react";
-import { Category, Prisma } from "@/generated/prisma/client";
+import { AlertCircleIcon, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { Alert, AlertTitle } from "./ui/alert";
-import { updateProduct } from "@/app/actions/product";
+import { useState } from "react";
+import { addCustomer } from "@/app/actions/customer";
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters!" }),
-  description: z.string().optional(),
-  categoryId: z.string().min(1),
-
-  price: z.coerce.number().positive(),
-  costPrice: z.coerce.number().positive(),
-
-  brand: z.string().optional(),
-  material: z.string().optional(),
+  firstName: z.string().min(1, "First Name must be at least 2 characters!"),
+  lastName: z.string().min(1, "Last Name must be at least 2 characters!"),
+  phone: z.string().optional(),
+  email: z
+    .string()
+    .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
+      message: "Invalid email address!",
+    })
+    .optional(),
+  address: z.string().optional(),
+  customerType: z.enum(["REGULAR", "VIP", "WHOLESALE"]),
 });
 
-const EditProduct = ({
-  categories,
-  product,
-}: {
-  categories: Category[];
-  product: Prisma.ProductUncheckedUpdateInput;
-}) => {
+const AddCustomer = () => {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const id = (product as { id: string }).id || "";
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
     defaultValues: {
-      name: (product as { name: string }).name || "",
-      description: (product as { description: string }).description || "",
-      categoryId: (product as { categoryId: string }).categoryId || "",
-      price: (product as { price: number }).price || 0,
-      costPrice: (product as { costPrice: number }).costPrice || 0,
-      brand: (product as { brand: string }).brand || "",
-      material: (product as { material: string }).material || "",
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      address: "",
+      customerType: "REGULAR",
     },
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
     try {
       setLoading(true);
-      await updateProduct(id, data);
+      await addCustomer(data);
       setOpen(false);
       form.reset();
-      toast.success("Product updated successfully!");
+      toast.success("Customer added successfully!");
     } catch (error) {
       setError(error as string);
-      toast.error("Failed to update product. Please try again.");
+      toast.error("Failed to add customer. Please try again.");
       setLoading(false);
     } finally {
       setLoading(false);
@@ -94,8 +80,8 @@ const EditProduct = ({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button>
-          <Edit />
-          Edit Product
+          <Plus />
+          Add Customer
         </Button>
       </SheetTrigger>
       <SheetContent>
@@ -109,108 +95,73 @@ const EditProduct = ({
             </div>
           )}
           <SheetHeader>
-            <SheetTitle className="mb-4">Edit Product</SheetTitle>
-            <SheetDescription>
-              Edit an existing product in your inventory
-            </SheetDescription>
+            <SheetTitle className="mb-4">Add Customer</SheetTitle>
+            <SheetDescription>Add a new customer</SheetDescription>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <FieldGroup>
                 <Controller
-                  name="name"
+                  name="firstName"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="name">Product Name</FieldLabel>
+                      <FieldLabel htmlFor="firstName">First Name</FieldLabel>
                       <Input
                         {...field}
-                        id="name"
+                        id="firstName"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
-                      <FieldDescription>
-                        Enter the name of the product
-                      </FieldDescription>
                     </Field>
                   )}
                 />
                 <Controller
-                  name="description"
+                  name="lastName"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="description">Description</FieldLabel>
-                      <Textarea
-                        {...field}
-                        id="description"
-                        aria-invalid={fieldState.invalid}
-                        placeholder="Enter Description"
-                        autoComplete="off"
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                      <FieldDescription>
-                        Enter the description of the product
-                      </FieldDescription>
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="price"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="price">Price</FieldLabel>
+                      <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
                       <Input
                         {...field}
-                        type="number"
-                        id="price"
+                        id="lastName"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
-                      <FieldDescription>
-                        Enter the price of the product
-                      </FieldDescription>
                     </Field>
                   )}
                 />
                 <Controller
-                  name="costPrice"
+                  name="email"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="costPrice">Cost Price</FieldLabel>
+                      <FieldLabel htmlFor="email">Email</FieldLabel>
                       <Input
                         {...field}
-                        type="number"
-                        id="costPrice"
+                        id="email"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
-                      <FieldDescription>
-                        This is the cost price of the product from supplier
-                      </FieldDescription>
                     </Field>
                   )}
                 />
                 <Controller
-                  name="brand"
+                  name="phone"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="brand">Brand</FieldLabel>
+                      <FieldLabel htmlFor="phone">Phone</FieldLabel>
                       <Input
                         {...field}
-                        id="brand"
+                        id="phone"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
@@ -221,14 +172,14 @@ const EditProduct = ({
                   )}
                 />
                 <Controller
-                  name="material"
+                  name="address"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="material">Material</FieldLabel>
+                      <FieldLabel htmlFor="address">Address</FieldLabel>
                       <Input
                         {...field}
-                        id="material"
+                        id="address"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />
@@ -239,27 +190,23 @@ const EditProduct = ({
                   )}
                 />
                 <Controller
-                  name="categoryId"
+                  name="customerType"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Category</FieldLabel>
+                      <FieldLabel>Customer Type</FieldLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <SelectTrigger aria-invalid={fieldState.invalid}>
-                          <SelectValue placeholder="Select Category" />
+                          <SelectValue placeholder="Select Customer Type" />
                         </SelectTrigger>
 
                         <SelectContent>
-                          {categories.map(
-                            (category: { id: string; name: string }) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            )
-                          )}
+                          <SelectItem value="REGULAR">Regular</SelectItem>
+                          <SelectItem value="VIP">VIP</SelectItem>
+                          <SelectItem value="WHOLESALE">Wholesale</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -272,7 +219,7 @@ const EditProduct = ({
               </FieldGroup>
 
               <Button disabled={loading} type="submit" className="mt-6 w-full">
-                {loading ? "Submitting..." : "Update Product"}
+                {loading ? "Submitting..." : "Add Customer"}
               </Button>
             </form>
           </SheetHeader>
@@ -282,4 +229,4 @@ const EditProduct = ({
   );
 };
 
-export default EditProduct;
+export default AddCustomer;

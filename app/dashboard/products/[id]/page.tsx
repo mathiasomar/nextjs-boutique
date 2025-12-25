@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { format, formatDistance, subDays } from "date-fns";
 import { getProductById } from "@/app/actions/product";
-import ProductImages from "../product-images";
+import ProductImages from "./product-images";
 import EditInventory from "@/components/edit-inventory";
 import EditProduct from "@/components/edit-product";
 import { getCategories } from "@/app/actions/category";

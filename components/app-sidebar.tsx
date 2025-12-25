@@ -74,7 +74,7 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link href="/dashboard">
-                <Image src={"/logo.png"} alt="logo" width={20} height={20} />
+                <Image src={"/logo.png"} alt="logo" width={40} height={40} />
                 <span>NajTrends Boutique</span>
               </Link>
             </SidebarMenuButton>

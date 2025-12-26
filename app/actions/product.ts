@@ -190,6 +190,10 @@ export const createProduct = async (
       },
     });
 
+    if (!product) {
+      return { error: "Failed to create product" };
+    }
+
     // Create inventory log
     await prisma.inventoryLog.create({
       data: {
@@ -268,6 +272,10 @@ export const updateProduct = async (
       },
     });
 
+    if (!product) {
+      return { error: "Failed to update product" };
+    }
+
     // Log activity
     await prisma.activityLog.create({
       data: {
@@ -316,9 +324,13 @@ export const deleteProduct = async (id: string) => {
     //   where: { productId: id },
     // });
 
-    await prisma.product.delete({
+    const product = await prisma.product.delete({
       where: { id },
     });
+
+    if (!product) {
+      return { error: "Failed to delete product" };
+    }
 
     // Log activity
     await prisma.activityLog.create({

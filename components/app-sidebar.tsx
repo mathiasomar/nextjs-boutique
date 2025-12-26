@@ -3,6 +3,7 @@
 import {
   Home,
   LineChart,
+  Logs,
   Settings,
   Shirt,
   ShoppingBasket,
@@ -56,6 +57,11 @@ const items = [
     title: "Analytics",
     url: "/dashboard/analytics",
     icon: LineChart,
+  },
+  {
+    title: "Logs",
+    url: "/dashboard/logs",
+    icon: Logs,
   },
   {
     title: "Settings",

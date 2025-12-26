@@ -89,6 +89,18 @@ export const addCustomer = async (
     const customer = await prisma.customer.create({
       data: validatedData.data!,
     });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        id: `act_${Date.now()}`,
+        userId: session.user.id,
+        action: "CREATE_CUSTOMER",
+        entityType: "Product",
+        entityId: customer.id,
+      },
+    });
+
     revalidatePath("/dashboard/customers");
     return customer;
   } catch (error) {
@@ -126,8 +138,19 @@ export const deleteCustomer = async (id: string) => {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
-    await prisma.customer.delete({
+    const customer = await prisma.customer.delete({
       where: { id },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        id: `act_${Date.now()}`,
+        userId: session.user.id,
+        action: "DELETE_CUSTOMER",
+        entityType: "Product",
+        entityId: customer.id,
+      },
     });
 
     return { success: true };
@@ -164,6 +187,18 @@ export const updateCustomer = async (
       where: { id },
       data: validatedData.data!,
     });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        id: `act_${Date.now()}`,
+        userId: session.user.id,
+        action: "UPDATE_CUSTOMER",
+        entityType: "Product",
+        entityId: customer.id,
+      },
+    });
+
     revalidatePath("/dashboard/customers");
     return customer;
   } catch (error) {
@@ -192,6 +227,18 @@ export const deleteManyCustomers = async (ids: string[]) => {
     await prisma.customer.deleteMany({
       where: { id: { in: ids } },
     });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        id: `act_${Date.now()}`,
+        userId: session.user.id,
+        action: "DELETE_MANY_CUSTOMER",
+        entityType: "Product",
+        entityId: "",
+      },
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Error deleting customers:", error);

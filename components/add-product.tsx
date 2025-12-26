@@ -34,11 +34,11 @@ import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
 import { useEffect, useState } from "react";
 import { AlertCircleIcon, Plus } from "lucide-react";
-import { Category } from "@/generated/prisma/client";
 import { colors, sizes } from "@/constants/product";
 import toast from "react-hot-toast";
 import { Alert, AlertTitle } from "./ui/alert";
-import { createProduct } from "@/app/actions/product";
+import { useCategories, useCreateProduct } from "@/hooks/use-product";
+import { Spinner } from "./ui/spinner";
 
 const formSchema = z
   .object({
@@ -66,11 +66,15 @@ const formSchema = z
     }
   );
 
-const AddProduct = ({ categories }: { categories: Category[] }) => {
-  const [error, setError] = useState<string | null>(null);
+const AddProduct = () => {
+  const addProductMutation = useCreateProduct();
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
+  const {
+    data: categories,
+    isLoading,
+    error: categoriesError,
+  } = useCategories();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
     defaultValues: {
@@ -102,20 +106,32 @@ const AddProduct = ({ categories }: { categories: Category[] }) => {
   }, [open, form]);
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
-    try {
-      setLoading(true);
-      await createProduct(data);
-      setOpen(false);
-      form.reset();
-      toast.success("Product added successfully!");
-    } catch (error) {
-      setError(error as string);
-      toast.error("Failed to add product. Please try again.");
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   setLoading(true);
+    //   await createProduct(data);
+    //   setOpen(false);
+    //   form.reset();
+    //   toast.success("Product added successfully!");
+    // } catch (error) {
+    //   setError(error as string);
+    //   toast.error("Failed to add product. Please try again.");
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
     // console.log("SUBMITTED", data);
+
+    try {
+      addProductMutation.mutateAsync(data, {
+        onSuccess: () => {
+          setOpen(false);
+          form.reset();
+          toast.success("Product added successfully!");
+        },
+      });
+    } catch (error) {
+      toast.error(error as string);
+    }
   };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -127,11 +143,11 @@ const AddProduct = ({ categories }: { categories: Category[] }) => {
       </SheetTrigger>
       <SheetContent>
         <ScrollArea className="h-screen">
-          {error && (
+          {addProductMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>
                 <AlertCircleIcon />
-                <AlertTitle>{error}</AlertTitle>
+                <AlertTitle>{addProductMutation.error as string}</AlertTitle>
               </Alert>
             </div>
           )}
@@ -281,13 +297,22 @@ const AddProduct = ({ categories }: { categories: Category[] }) => {
                         </SelectTrigger>
 
                         <SelectContent>
-                          {categories.map(
-                            (category: { id: string; name: string }) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
+                          {isLoading ? (
+                            <Spinner />
+                          ) : categoriesError ? (
+                            <p>{categoriesError as string}</p>
+                          ) : Array.isArray(categories) ? (
+                            categories.map(
+                              (category: { id: string; name: string }) => (
+                                <SelectItem
+                                  key={category.id}
+                                  value={category.id}
+                                >
+                                  {category.name}
+                                </SelectItem>
+                              )
                             )
-                          )}
+                          ) : null}
                         </SelectContent>
                       </Select>
 
@@ -472,11 +497,13 @@ const AddProduct = ({ categories }: { categories: Category[] }) => {
               </FieldGroup>
 
               <Button
-                disabled={loading || uploading}
+                disabled={
+                  addProductMutation.isPending || isLoading || uploading
+                }
                 type="submit"
                 className="mt-6 w-full"
               >
-                {loading ? "Submitting..." : "Add Product"}
+                {addProductMutation.isPending ? "Submitting..." : "Add Product"}
               </Button>
             </form>
           </SheetHeader>

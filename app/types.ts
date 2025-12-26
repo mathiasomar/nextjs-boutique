@@ -39,8 +39,9 @@ export type Product = {
     id: string;
     name: string;
   };
-  price: number;
-  costPrice: number;
+  price: string;
+  costPrice: string;
+  lowStockAlert: boolean;
   name: string;
   description: string;
   size: [string, ...string[]];
@@ -60,6 +61,7 @@ export type EditProduct = {
   name: string;
   description: string;
   material?: string;
+  updatedBy: string;
 };
 
 export type EditInventoryType = {

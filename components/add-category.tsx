@@ -23,17 +23,16 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { AlertCircleIcon, Plus } from "lucide-react";
 import { useState } from "react";
-import { addCategory } from "@/app/actions/category";
 import toast from "react-hot-toast";
 import { Alert, AlertTitle } from "./ui/alert";
+import { useCreatecategory } from "@/hooks/use-product";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name must be at least 2 characters!"),
 });
 
 const AddCategory = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>();
+  const addCategoryMutation = useCreatecategory();
   const [open, setOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,18 +43,25 @@ const AddCategory = () => {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     // Do something with the form values.
-    try {
-      setLoading(true);
-      await addCategory(data);
-      setOpen(false);
-      form.reset();
-      toast.success("Category added successfully!");
-    } catch (error) {
-      setError(error as string);
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   setLoading(true);
+    //   await addCategory(data);
+    //   setOpen(false);
+    //   form.reset();
+    //   toast.success("Category added successfully!");
+    // } catch (error) {
+    //   setError(error as string);
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
+    addCategoryMutation.mutateAsync(data, {
+      onSuccess: () => {
+        setOpen(false);
+        form.reset();
+        toast.success("Category added successfully!");
+      },
+    });
   };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -66,11 +72,11 @@ const AddCategory = () => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        {error && (
+        {addCategoryMutation.isError && (
           <div className="my-2">
             <Alert variant={"destructive"}>
               <AlertCircleIcon />
-              <AlertTitle>{error}</AlertTitle>
+              <AlertTitle>{addCategoryMutation.error as string}</AlertTitle>
             </Alert>
           </div>
         )}
@@ -100,8 +106,12 @@ const AddCategory = () => {
                 />
               </FieldGroup>
 
-              <Button disabled={loading} type="submit" className="mt-6 w-full">
-                {loading ? "Adding..." : "Add Category"}
+              <Button
+                disabled={addCategoryMutation.isPending}
+                type="submit"
+                className="mt-6 w-full"
+              >
+                {addCategoryMutation.isPending ? "Adding..." : "Add Category"}
               </Button>
             </form>
           </SheetDescription>

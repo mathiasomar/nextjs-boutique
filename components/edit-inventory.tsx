@@ -14,7 +14,6 @@ import { AlertCircleIcon, Edit } from "lucide-react";
 import z, { string } from "zod";
 import { Controller, Resolver, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateStock } from "@/app/actions/product";
 import { toast } from "react-hot-toast";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
@@ -33,6 +32,7 @@ import {
 } from "./ui/input-group";
 import { ScrollArea } from "./ui/scroll-area";
 import { Alert, AlertTitle } from "./ui/alert";
+import { useUpdateProductStock } from "@/hooks/use-product";
 
 const formSchema = z.object({
   quantity: z.coerce.number().min(1),
@@ -50,9 +50,8 @@ const formSchema = z.object({
 });
 
 const EditInventory = ({ productId }: { productId: string }) => {
-  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const updateProductInventoryMutation = useUpdateProductStock();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
@@ -64,20 +63,38 @@ const EditInventory = ({ productId }: { productId: string }) => {
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
-    try {
-      setLoading(true);
-      await updateStock(productId, data.quantity, data.type, data.reason);
-      setOpen(false);
-      form.reset();
-      toast.success("Inventory updated successfully!");
-    } catch (error) {
-      setError(error as string);
-      toast.error("Failed to update inventory. Please try again.");
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   setLoading(true);
+    //   await updateStock(productId, data.quantity, data.type, data.reason);
+    //   setOpen(false);
+    //   form.reset();
+    //   toast.success("Inventory updated successfully!");
+    // } catch (error) {
+    //   setError(error as string);
+    //   toast.error("Failed to update inventory. Please try again.");
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
     // console.log("SUBMITTED", data);
+    try {
+      updateProductInventoryMutation.mutateAsync(
+        {
+          productId,
+          quantity: data.quantity,
+          type: data.type,
+          reason: data.reason,
+        },
+        {
+          onSuccess: () => {
+            setOpen(false);
+            toast.success("Inventory updated successfully!");
+          },
+        }
+      );
+    } catch (error) {
+      toast.error(error as string);
+    }
   };
 
   return (
@@ -90,11 +107,13 @@ const EditInventory = ({ productId }: { productId: string }) => {
       </SheetTrigger>
       <SheetContent>
         <ScrollArea className="max-h-screen">
-          {error && (
+          {updateProductInventoryMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>
                 <AlertCircleIcon />
-                <AlertTitle>{error}</AlertTitle>
+                <AlertTitle>
+                  {updateProductInventoryMutation.error as string}
+                </AlertTitle>
               </Alert>
             </div>
           )}
@@ -183,8 +202,14 @@ const EditInventory = ({ productId }: { productId: string }) => {
                 )}
               />
             </FieldGroup>
-            <Button disabled={loading} type="submit" className="mt-6 w-full">
-              {loading ? "Updating..." : "Update Product Inventory"}
+            <Button
+              disabled={updateProductInventoryMutation.isPending}
+              type="submit"
+              className="mt-6 w-full"
+            >
+              {updateProductInventoryMutation.isPending
+                ? "Updating..."
+                : "Update Product Inventory"}
             </Button>
           </form>
         </ScrollArea>

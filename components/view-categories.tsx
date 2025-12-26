@@ -9,53 +9,24 @@ import {
 } from "./ui/sheet";
 import { Button } from "./ui/button";
 import { Eye, Trash2 } from "lucide-react";
-import { deleteCategory, getCategories } from "@/app/actions/category";
 import { ScrollArea } from "./ui/scroll-area";
 import { Item, ItemActions, ItemContent, ItemDescription } from "./ui/item";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useCategories, useDeleteCategory } from "@/hooks/use-product";
+import { Spinner } from "./ui/spinner";
+import toast from "react-hot-toast";
 
 const ViewCategories = () => {
-  const [categories, setCategories] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-
-  const loadAndSetCategories = async () => {
-    setLoading(true);
-    setError(null);
-    const result = await getCategories();
-
-    if (Array.isArray(result)) {
-      setCategories(result);
-    } else if (result?.error) {
-      setError(result.error);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      await loadAndSetCategories();
-    };
-
-    if (open) {
-      loadCategories();
-    }
-  }, [open]);
+  const deleteCategoryMutation = useDeleteCategory();
+  const { data: categories, isLoading, error } = useCategories();
 
   const handleDelete = async (id: string) => {
-    const result = await deleteCategory(id);
-
-    if (result?.error) {
-      alert(result.error);
-    } else {
-      // Remove from local state
-      setCategories((prev) => prev.filter((cat) => cat.id !== id));
-      // Refresh data
-      await loadAndSetCategories();
-    }
+    deleteCategoryMutation.mutateAsync(id, {
+      onSuccess: () => {
+        toast.success("Category deleted successfully!");
+      },
+    });
   };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -69,23 +40,33 @@ const ViewCategories = () => {
         <SheetHeader>
           <ScrollArea>
             <SheetTitle className="mb-4">View Category</SheetTitle>
-            {loading && <p>Loading...</p>}
-            {categories.map((category) => (
-              <Item key={category.id}>
-                <ItemContent>
-                  <ItemDescription>{category.name}</ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete(category.id)}
-                  >
-                    <Trash2 />
-                  </Button>
-                </ItemActions>
-              </Item>
-            ))}
+            {isLoading ? (
+              <span>
+                Loading... <Spinner />
+              </span>
+            ) : error ? (
+              <span>{error as string}</span>
+            ) : Array.isArray(categories) ? (
+              categories.map((category) => (
+                <Item key={category.id}>
+                  <ItemContent>
+                    <ItemDescription>{category.name}</ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <Button
+                      variant="destructive"
+                      disabled={deleteCategoryMutation.isPending}
+                      size="sm"
+                      onClick={() => handleDelete(category.id)}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </ItemActions>
+                </Item>
+              ))
+            ) : (
+              <span>No categories found</span>
+            )}
           </ScrollArea>
         </SheetHeader>
       </SheetContent>

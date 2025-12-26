@@ -6,46 +6,39 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
 import AddCategory from "@/components/add-category";
 import ViewCategories from "@/components/view-categories";
 import AddProduct from "@/components/add-product";
-import { getCategories } from "@/app/actions/category";
-import { getProducts } from "@/app/actions/product";
-import { Product } from "@/generated/prisma/client";
+// import { Product } from "@/generated/prisma/client";
 import FilterProduct from "@/components/filter-product";
 import Search from "@/components/search";
+import ProductDataTable from "@/components/datatables/product-data-table";
 
-type FilterProps = {
-  search?: string;
-  stock?: string;
-  isActive?: boolean;
-};
+// type FilterProps = {
+//   search?: string;
+//   stock?: string;
+//   isActive?: boolean;
+// };
 
-const ProductsPage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<FilterProps>;
-}) => {
-  const { search, stock, isActive } = await searchParams;
-  const productsResult = await getProducts({
-    search,
-    stock,
-    isActive,
-  });
-  const categoryResult = await getCategories();
-  const categories = "error" in categoryResult ? [] : categoryResult;
+const ProductsPage = async () => {
+  // const { search, stock, isActive } = await searchParams;
+  // const productsResult = await getProducts({
+  //   search,
+  //   stock,
+  //   isActive,
+  // });
+  // const categoryResult = await getCategories();
+  // const categories = "error" in categoryResult ? [] : categoryResult;
 
-  if ("error" in productsResult) {
-    return <div>Error loading products: {productsResult.error}</div>;
-  }
+  // if ("error" in productsResult) {
+  //   return <div>Error loading products: {productsResult.error}</div>;
+  // }
 
-  const products = productsResult.map((product) => ({
-    ...product,
-    price: product.price as number,
-    costPrice: product.costPrice as number,
-  })) as unknown as Product[];
+  // const products = productsResult.map((product) => ({
+  //   ...product,
+  //   price: product.price as number,
+  //   costPrice: product.costPrice as number,
+  // })) as unknown as Product[];
 
   return (
     <div>
@@ -65,7 +58,7 @@ const ProductsPage = async ({
         <div className="flex items-center gap-4">
           <AddCategory />
           <ViewCategories />
-          <AddProduct categories={categories} />
+          <AddProduct />
         </div>
       </div>
       <div className="flex items-center justify-between flex-col md:flex-row gap-4 mb-8 px-4 py-2 bg-secondary roundedn-md">
@@ -76,7 +69,8 @@ const ProductsPage = async ({
           <FilterProduct />
         </div>
       </div>
-      <DataTable columns={columns} data={products} />
+      {/* <DataTable columns={columns} data={products} /> */}
+      <ProductDataTable />
     </div>
   );
 };

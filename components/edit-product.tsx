@@ -33,62 +33,111 @@ import {
 import { ScrollArea } from "./ui/scroll-area";
 import { useState } from "react";
 import { AlertCircleIcon, Edit } from "lucide-react";
-import { Category, Prisma } from "@/generated/prisma/client";
 import toast from "react-hot-toast";
 import { Alert, AlertTitle } from "./ui/alert";
-import { updateProduct } from "@/app/actions/product";
+import {
+  useCategories,
+  useProduct,
+  useUpdateProduct,
+} from "@/hooks/use-product";
+import { Spinner } from "./ui/spinner";
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters!" }),
-  description: z.string().optional(),
-  categoryId: z.string().min(1),
+const formSchema = z
+  .object({
+    name: z.string().min(2, { message: "Name must be at least 2 characters!" }),
+    description: z.string().optional(),
+    categoryId: z.string().min(1),
 
-  price: z.coerce.number().positive(),
-  costPrice: z.coerce.number().positive(),
+    price: z.coerce.number().positive(),
+    costPrice: z.coerce.number().positive(),
 
-  brand: z.string().optional(),
-  material: z.string().optional(),
-});
+    brand: z.string().optional(),
+    material: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const price = parseFloat(data.price.toString());
+      const costPrice = parseFloat(data.costPrice.toString());
+      return price >= costPrice;
+    },
+    {
+      message: "Price must be greater than or equal to cost price",
+      path: ["price"], // Show error on price field
+    }
+  );
 
-const EditProduct = ({
-  categories,
-  product,
-}: {
-  categories: Category[];
-  product: Prisma.ProductUncheckedUpdateInput;
-}) => {
-  const [error, setError] = useState<string | null>(null);
+const EditProduct = ({ productId }: { productId: string }) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const id = (product as { id: string }).id || "";
+  const fetchProduct = useProduct(productId);
+  const fetchCategories = useCategories();
+  const updateProductMutation = useUpdateProduct();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
     defaultValues: {
-      name: (product as { name: string }).name || "",
-      description: (product as { description: string }).description || "",
-      categoryId: (product as { categoryId: string }).categoryId || "",
-      price: (product as { price: number }).price || 0,
-      costPrice: (product as { costPrice: number }).costPrice || 0,
-      brand: (product as { brand: string }).brand || "",
-      material: (product as { material: string }).material || "",
+      name: fetchProduct.isLoading
+        ? ""
+        : (fetchProduct.data?.product &&
+            (fetchProduct.data.product.name as string)) ||
+          "",
+      description: fetchProduct.isLoading
+        ? ""
+        : (fetchProduct.data?.product &&
+            (fetchProduct.data.product.description as string)) ||
+          "",
+      categoryId: fetchProduct.isLoading
+        ? ""
+        : (fetchProduct.data?.product &&
+            (fetchProduct.data.product.categoryId as string)) ||
+          "",
+      price: fetchProduct.isLoading
+        ? 0
+        : (fetchProduct.data?.product &&
+            parseInt(String(fetchProduct.data?.product.price))) ||
+          0,
+      costPrice: fetchProduct.isLoading
+        ? 0
+        : (fetchProduct.data?.product &&
+            parseInt(String(fetchProduct.data?.product.costPrice))) ||
+          0,
+      brand: fetchProduct.isLoading
+        ? ""
+        : (fetchProduct.data?.product && fetchProduct.data.product.brand) || "",
+      material: fetchProduct.isLoading
+        ? ""
+        : (fetchProduct.data?.product && fetchProduct.data.product.material) ||
+          "",
     },
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
-    try {
-      setLoading(true);
-      await updateProduct(id, data);
-      setOpen(false);
-      form.reset();
-      toast.success("Product updated successfully!");
-    } catch (error) {
-      setError(error as string);
-      toast.error("Failed to update product. Please try again.");
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   setLoading(true);
+    //   await updateProduct(id, data);
+    //   setOpen(false);
+    //   form.reset();
+    //   toast.success("Product updated successfully!");
+    // } catch (error) {
+    //   setError(error as string);
+    //   toast.error("Failed to update product. Please try again.");
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
     // console.log("SUBMITTED", data);
+    try {
+      updateProductMutation.mutateAsync(
+        { id: productId, ...data },
+        {
+          onSuccess: () => {
+            setOpen(false);
+            toast.success("Product updated successfully!");
+            fetchProduct.refetch();
+          },
+        }
+      );
+    } catch (error) {
+      toast.error(error as string);
+    }
   };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -100,11 +149,11 @@ const EditProduct = ({
       </SheetTrigger>
       <SheetContent>
         <ScrollArea className="h-screen">
-          {error && (
+          {updateProductMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>
                 <AlertCircleIcon />
-                <AlertTitle>{error}</AlertTitle>
+                <AlertTitle>{updateProductMutation.error as string}</AlertTitle>
               </Alert>
             </div>
           )}
@@ -253,12 +302,23 @@ const EditProduct = ({
                         </SelectTrigger>
 
                         <SelectContent>
-                          {categories.map(
-                            (category: { id: string; name: string }) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
+                          {fetchCategories.isLoading ? (
+                            <Spinner />
+                          ) : fetchCategories.error ? (
+                            <p>{fetchCategories.error as string}</p>
+                          ) : Array.isArray(fetchCategories.data) ? (
+                            fetchCategories.data.map(
+                              (category: { id: string; name: string }) => (
+                                <SelectItem
+                                  key={category.id}
+                                  value={category.id}
+                                >
+                                  {category.name}
+                                </SelectItem>
+                              )
                             )
+                          ) : (
+                            <p>No categories found</p>
                           )}
                         </SelectContent>
                       </Select>
@@ -271,8 +331,14 @@ const EditProduct = ({
                 />
               </FieldGroup>
 
-              <Button disabled={loading} type="submit" className="mt-6 w-full">
-                {loading ? "Submitting..." : "Update Product"}
+              <Button
+                disabled={updateProductMutation.isPending}
+                type="submit"
+                className="mt-6 w-full"
+              >
+                {updateProductMutation.isPending
+                  ? "Submitting..."
+                  : "Update Product"}
               </Button>
             </form>
           </SheetHeader>

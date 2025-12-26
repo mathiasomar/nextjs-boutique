@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { deleteManyProducts } from "@/app/actions/product";
 import toast from "react-hot-toast";
+import { useDeleteProduct } from "@/hooks/use-product";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -37,7 +38,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
-  const [loading, setLoading] = useState(false);
+  const deleteProductsMutation = useDeleteProduct();
   const table = useReactTable({
     data,
     columns,
@@ -55,24 +56,37 @@ export function DataTable<TData, TValue>({
     .getSelectedRowModel()
     .rows.map((row) => (row.original as { id: string }).id);
 
-  const handleDelete = async () => {
+  const handleDeleteProducts = async () => {
+    // try {
+    //   setLoading(true);
+    //   const result = await deleteManyProducts(selectedIds);
+    //   if (result && "error" in result && result.error) {
+    //     toast.error(result.error);
+    //     setLoading(false);
+    //     return;
+    //   }
+    //   setRowSelection({});
+    //   toast.success(`${selectedIds.length} Product(s) deleted successfully!`);
+    // } catch (error) {
+    //   toast.error(
+    //     error instanceof Error ? error.message : "Failed to delete product(s)"
+    //   );
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
+
     try {
-      setLoading(true);
-      const result = await deleteManyProducts(selectedIds);
-      if (result && "error" in result && result.error) {
-        toast.error(result.error);
-        setLoading(false);
-        return;
-      }
-      setRowSelection({});
-      toast.success(`${selectedIds.length} Product(s) deleted successfully!`);
+      deleteProductsMutation.mutateAsync(selectedIds, {
+        onSuccess: () => {
+          setRowSelection({});
+          toast.success(
+            `${selectedIds.length} Product(s) deleted successfully!`
+          );
+        },
+      });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete product(s)"
-      );
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      toast.error(error as string);
     }
   };
   return (
@@ -82,8 +96,8 @@ export function DataTable<TData, TValue>({
           <Button
             className="text-sm"
             variant={"destructive"}
-            onClick={handleDelete}
-            disabled={loading}
+            onClick={handleDeleteProducts}
+            disabled={deleteProductsMutation.isPending}
           >
             <Trash2 className="w-4 h-4" />
             Delete selected ({selectedIds.length}) Product(s)

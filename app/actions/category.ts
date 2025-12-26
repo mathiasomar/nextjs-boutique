@@ -1,6 +1,5 @@
 "use server";
 
-import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -28,7 +27,7 @@ export const addCategory = async (data: { name: string }) => {
     return { error: "Invalid category data" };
   }
   try {
-    const category: Prisma.CategoryCreateInput = await prisma.category.create({
+    const category = await prisma.category.create({
       data: validatedData.data!,
     });
     revalidatePath("/dashboard/categories");

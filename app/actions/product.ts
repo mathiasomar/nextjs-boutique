@@ -5,7 +5,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { InventoryType } from "@/generated/prisma/enums";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+// import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { ProductFilters } from "../types";
 // import { z } from "zod";
@@ -78,12 +78,18 @@ export const getProducts = async (filters: ProductFilters = {}) => {
       },
     });
 
-    // Transform Decimal fields to plain numbers
-    return products.map((product) => ({
+    // Convert Decimal to string to preserve precision
+    const serializedProducts = products.map((product) => ({
       ...product,
-      price: product.price.toNumber(),
-      costPrice: product.costPrice.toNumber(),
+      price: product.price.toNumber(), // Convert Decimal to string
+      costPrice: product.costPrice.toNumber(), // Convert Decimal to string
     }));
+
+    // Transform Decimal fields to plain numbers
+    return {
+      success: true,
+      products: serializedProducts,
+    };
   } catch (error) {
     console.error("Create product error:", error);
     return { error: "Failed to create product" };
@@ -111,12 +117,15 @@ export const getProductById = async (id: string) => {
     });
     if (!product) return null;
 
-    // Transform Decimal fields to plain numbers
-    return {
+    // Convert Decimal to string
+    const serializedProduct = {
       ...product,
       price: product.price.toNumber(),
       costPrice: product.costPrice.toNumber(),
     };
+
+    // Transform Decimal fields to plain numbers
+    return { success: true, product: serializedProduct };
   } catch (error) {
     console.error("Create product error:", error);
     return { error: "Failed to create product" };
@@ -206,7 +215,7 @@ export const createProduct = async (
       },
     });
 
-    revalidatePath("/dashboard/products");
+    // revalidatePath("/dashboard/products");
     return {
       success: true,
       product: {
@@ -270,8 +279,8 @@ export const updateProduct = async (
       },
     });
 
-    revalidatePath("/dashboard/products");
-    revalidatePath(`/dashboard/products/${id}`);
+    // revalidatePath("/dashboard/products");
+    // revalidatePath(`/dashboard/products/${id}`);
     return {
       success: true,
       product: {
@@ -322,7 +331,7 @@ export const deleteProduct = async (id: string) => {
       },
     });
 
-    revalidatePath("/dashboard/products");
+    // revalidatePath("/dashboard/products");
     return { success: true };
   } catch (error) {
     console.error("Delete product error:", error);
@@ -378,8 +387,8 @@ export const updateStock = async (
       },
     });
 
-    revalidatePath("/inventory");
-    revalidatePath(`/products/${productId}`);
+    // revalidatePath("/inventory");
+    // revalidatePath(`/products/${productId}`);
     return { success: true };
   } catch (error) {
     console.error("Update stock error:", error);
@@ -414,6 +423,6 @@ export const deleteManyProducts = async (ids: string[]) => {
     },
   });
 
-  revalidatePath("/dashboard/products");
+  // revalidatePath("/dashboard/products");
   return { success: true };
 };

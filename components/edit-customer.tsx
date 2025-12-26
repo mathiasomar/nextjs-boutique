@@ -14,7 +14,6 @@ import z from "zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Resolver } from "react-hook-form";
-import { updateCustomer } from "@/app/actions/customer";
 import toast from "react-hot-toast";
 import { Button } from "./ui/button";
 import { AlertCircleIcon, Edit } from "lucide-react";
@@ -29,6 +28,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { ScrollArea } from "./ui/scroll-area";
+import { useCustomer, useUpdateCustomer } from "@/hooks/use-customer";
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First Name must be at least 2 characters!"),
@@ -49,38 +49,60 @@ const formSchema = z.object({
 });
 
 const EditCustomer = ({ customer }: { customer: Customer }) => {
-  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const updateCustomerMutation = useUpdateCustomer();
+
+  const { data, isLoading } = useCustomer(customer.id);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
     defaultValues: {
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      phone: customer.phone || "",
-      email: customer.email || "",
-      address: customer.address || "",
-      loyaltyPoints: customer.loyaltyPoints || 0,
-      customerType: customer.customerType,
+      firstName: isLoading
+        ? ""
+        : (data?.customer && data.customer.firstName) || "",
+      lastName: isLoading
+        ? ""
+        : (data?.customer && data.customer.lastName) || "",
+      phone: isLoading ? "" : (data?.customer && data.customer.phone) || "",
+      email: isLoading ? "" : (data?.customer && data.customer.email) || "",
+      address: isLoading ? "" : (data?.customer && data.customer.address) || "",
+      loyaltyPoints: isLoading
+        ? 0
+        : (data?.customer && data.customer.loyaltyPoints) || 0,
+      customerType: isLoading
+        ? "REGULAR"
+        : (data?.customer && data.customer.customerType) || "REGULAR",
     },
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
-    try {
-      setLoading(true);
-      await updateCustomer(customer.id, data);
-      setOpen(false);
-      form.reset();
-      toast.success("Customer updated successfully!");
-    } catch (error) {
-      setError(error as string);
-      toast.error("Failed to update customer. Please try again.");
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   setLoading(true);
+    //   await updateCustomer(customer.id, data);
+    //   setOpen(false);
+    //   form.reset();
+    //   toast.success("Customer updated successfully!");
+    // } catch (error) {
+    //   setError(error as string);
+    //   toast.error("Failed to update customer. Please try again.");
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
     // console.log("SUBMITTED", data);
+    try {
+      updateCustomerMutation.mutateAsync(
+        { id: customer.id, ...data },
+        {
+          onSuccess: () => {
+            setOpen(false);
+            toast.success("Customer updated successfully!");
+          },
+        }
+      );
+    } catch (error) {
+      toast.error(error as string);
+    }
   };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -91,11 +113,13 @@ const EditCustomer = ({ customer }: { customer: Customer }) => {
       </SheetTrigger>
       <SheetContent>
         <ScrollArea className="h-screen">
-          {error && (
+          {updateCustomerMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>
                 <AlertCircleIcon />
-                <AlertTitle>{error}</AlertTitle>
+                <AlertTitle>
+                  {updateCustomerMutation.error as string}
+                </AlertTitle>
               </Alert>
             </div>
           )}
@@ -243,8 +267,14 @@ const EditCustomer = ({ customer }: { customer: Customer }) => {
                 )}
               />
             </FieldGroup>
-            <Button disabled={loading} type="submit" className="mt-6 w-full">
-              {loading ? "Submitting..." : "Update Customer"}
+            <Button
+              disabled={updateCustomerMutation.isPending}
+              type="submit"
+              className="mt-6 w-full"
+            >
+              {updateCustomerMutation.isPending
+                ? "Submitting..."
+                : "Update Customer"}
             </Button>
           </form>
         </ScrollArea>

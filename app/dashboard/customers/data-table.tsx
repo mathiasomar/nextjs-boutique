@@ -24,7 +24,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { deleteManyCustomers } from "@/app/actions/customer";
+import { useDeleteCustomer } from "@/hooks/use-customer";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -37,7 +37,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
-  const [loading, setLoading] = useState(false);
+  const deleteCustomerMutation = useDeleteCustomer();
   const table = useReactTable({
     data,
     columns,
@@ -56,23 +56,35 @@ export function DataTable<TData, TValue>({
     .rows.map((row) => (row.original as { id: string }).id);
 
   const handleDelete = async () => {
+    // try {
+    //   setLoading(true);
+    //   const result = await deleteManyCustomers(selectedIds);
+    //   if (result && "error" in result && result.error) {
+    //     toast.error(result.error);
+    //     setLoading(false);
+    //     return;
+    //   }
+    //   setRowSelection({});
+    //   toast.success(`${selectedIds.length} Customer(s) deleted successfully!`);
+    // } catch (error) {
+    //   toast.error(
+    //     error instanceof Error ? error.message : "Failed to delete customer(s)"
+    //   );
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
     try {
-      setLoading(true);
-      const result = await deleteManyCustomers(selectedIds);
-      if (result && "error" in result && result.error) {
-        toast.error(result.error);
-        setLoading(false);
-        return;
-      }
-      setRowSelection({});
-      toast.success(`${selectedIds.length} Customer(s) deleted successfully!`);
+      deleteCustomerMutation.mutateAsync(selectedIds, {
+        onSuccess: () => {
+          setRowSelection({});
+          toast.success(
+            `${selectedIds.length} Customer(s) deleted successfully!`
+          );
+        },
+      });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete customer(s)"
-      );
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      toast.error(error as string);
     }
   };
   return (
@@ -83,10 +95,10 @@ export function DataTable<TData, TValue>({
             className="text-sm"
             variant={"destructive"}
             onClick={handleDelete}
-            disabled={loading}
+            disabled={deleteCustomerMutation.isPending}
           >
             <Trash2 className="w-4 h-4" />
-            Delete selected ({selectedIds.length}) Product(s)
+            Delete selected ({selectedIds.length}) Customer(s)
           </Button>
         </div>
       )}

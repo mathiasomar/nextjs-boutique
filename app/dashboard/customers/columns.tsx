@@ -43,9 +43,7 @@ export const columns: ColumnDef<Customer>[] = [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Full Name" />
-    ),
+    header: "Full Name",
     cell: ({ row }) => {
       const customer = row.original;
       return (

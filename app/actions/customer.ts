@@ -70,6 +70,16 @@ export const addCustomer = async (
   if (!validatedData) {
     return { error: "Invalid customer data" };
   }
+
+  const checkCustomerExists = await prisma.customer.findUnique({
+    where: {
+      email: formData.email as string,
+    },
+  });
+
+  if (checkCustomerExists) {
+    return { error: "Customer already exists" };
+  }
   try {
     const customer = await prisma.customer.create({
       data: validatedData.data!,

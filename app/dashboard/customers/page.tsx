@@ -6,29 +6,12 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
-import { Customer } from "@/generated/prisma/client";
-import { getCustomers } from "@/app/actions/customer";
 import Search from "@/components/search";
 import AddCustomer from "@/components/add-customer";
-import { CustomerFilters } from "@/app/types";
 import FilterCustomer from "@/components/filter-customer";
+import CustomerDataTable from "@/components/datatables/customer-data-table";
 
-const CustomersPage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<CustomerFilters>;
-}) => {
-  const { search, type } = await searchParams;
-  const customersResult = await getCustomers({ search, type });
-
-  if ("error" in customersResult) {
-    return <div>Error loading customers: {customersResult.error}</div>;
-  }
-
-  const customers: Customer[] = customersResult;
-
+const CustomersPage = async () => {
   return (
     <div>
       <Breadcrumb className="mb-8">
@@ -56,7 +39,7 @@ const CustomersPage = async ({
           <FilterCustomer />
         </div>
       </div>
-      <DataTable columns={columns} data={customers} />
+      <CustomerDataTable />
     </div>
   );
 };

@@ -1,0 +1,93 @@
+import {
+  addCustomer,
+  deleteManyCustomers,
+  getCustomerById,
+  getCustomers,
+  updateCustomer,
+} from "@/app/actions/customer";
+import { Customer, Prisma } from "@/generated/prisma/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+export const useCustomers = (filters?: {
+  search?: string;
+  type?: "REGULAR" | "VIP" | "WHOLESALE";
+}) => {
+  return useQuery({
+    queryKey: ["customers", filters],
+    queryFn: async () => {
+      const result = await getCustomers(filters);
+      if (!result) {
+        throw new Error("Customer not found");
+      }
+      return result;
+    },
+    keepPreviousData: true,
+  });
+};
+
+export const useCustomer = (id: string) => {
+  return useQuery({
+    queryKey: ["customers", id],
+    queryFn: async () => {
+      const result = await getCustomerById(id as string);
+      if (!result) {
+        throw new Error("Customer not found");
+      }
+      return result;
+    },
+  });
+};
+
+export const useCreateCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (
+      data: Prisma.CustomerUncheckedCreateInput
+    ): Promise<Customer | { error: string }> => {
+      const result = await addCustomer(data);
+      if (!result) {
+        throw new Error("Failed to add category");
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+  });
+};
+
+export const useUpdateCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...data
+    }: Partial<Customer> & { id: string }): Promise<Customer> => {
+      const result = await updateCustomer(id, data);
+      if (!result) {
+        throw new Error("User not found");
+      }
+      return result as Customer;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(["customers", variables.id], data);
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+  });
+};
+
+export const useDeleteCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string[]): Promise<void> => {
+      await deleteManyCustomers(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+  });
+};

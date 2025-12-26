@@ -28,7 +28,7 @@ import { AlertCircleIcon, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { Alert, AlertTitle } from "./ui/alert";
 import { useState } from "react";
-import { addCustomer } from "@/app/actions/customer";
+import { useCreateCustomer } from "@/hooks/use-customer";
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First Name must be at least 2 characters!"),
@@ -45,9 +45,8 @@ const formSchema = z.object({
 });
 
 const AddCustomer = () => {
-  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const addCustomerMutation = useCreateCustomer();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
     defaultValues: {
@@ -61,20 +60,34 @@ const AddCustomer = () => {
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
-    try {
-      setLoading(true);
-      await addCustomer(data);
-      setOpen(false);
-      form.reset();
-      toast.success("Customer added successfully!");
-    } catch (error) {
-      setError(error as string);
-      toast.error("Failed to add customer. Please try again.");
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   setLoading(true);
+    //   await addCustomer(data);
+    //   setOpen(false);
+    //   form.reset();
+    //   toast.success("Customer added successfully!");
+    // } catch (error) {
+    //   setError(error as string);
+    //   toast.error("Failed to add customer. Please try again.");
+    //   setLoading(false);
+    // } finally {
+    //   setLoading(false);
+    // }
     // console.log("SUBMITTED", data);
+    try {
+      addCustomerMutation.mutateAsync(data, {
+        onSuccess: () => {
+          setOpen(false);
+          form.reset();
+          toast.success("Customer added successfully!");
+        },
+        onError: (error) => {
+          toast.error(error as string);
+        },
+      });
+    } catch (error) {
+      toast.error(error as string);
+    }
   };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -86,11 +99,11 @@ const AddCustomer = () => {
       </SheetTrigger>
       <SheetContent>
         <ScrollArea className="h-screen">
-          {error && (
+          {addCustomerMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>
                 <AlertCircleIcon />
-                <AlertTitle>{error}</AlertTitle>
+                <AlertTitle>{addCustomerMutation.error as string}</AlertTitle>
               </Alert>
             </div>
           )}
@@ -218,8 +231,14 @@ const AddCustomer = () => {
                 />
               </FieldGroup>
 
-              <Button disabled={loading} type="submit" className="mt-6 w-full">
-                {loading ? "Submitting..." : "Add Customer"}
+              <Button
+                disabled={addCustomerMutation.isPending}
+                type="submit"
+                className="mt-6 w-full"
+              >
+                {addCustomerMutation.isPending
+                  ? "Submitting..."
+                  : "Add Customer"}
               </Button>
             </form>
           </SheetHeader>

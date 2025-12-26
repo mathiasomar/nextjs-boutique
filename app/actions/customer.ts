@@ -58,6 +58,11 @@ export const getCustomers = async (filters: CustomerFilters = {}) => {
 export const addCustomer = async (
   formData: Prisma.CustomerUncheckedCreateInput
 ) => {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
   const validatedData = customerSchema.safeParse({
     firstName: formData.firstName,
     lastName: formData.lastName,
@@ -93,6 +98,11 @@ export const addCustomer = async (
 };
 
 export const getCustomerById = async (id: string) => {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
   try {
     const customer = await prisma.customer.findUnique({
       where: { id },
@@ -110,6 +120,11 @@ export const getCustomerById = async (id: string) => {
 };
 
 export const deleteCustomer = async (id: string) => {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
   try {
     await prisma.customer.delete({
       where: { id },
@@ -126,6 +141,11 @@ export const updateCustomer = async (
   id: string,
   formData: Prisma.CustomerUncheckedUpdateInput
 ) => {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
   const validatedData = customerSchema.safeParse({
     firstName: formData.firstName,
     lastName: formData.lastName,

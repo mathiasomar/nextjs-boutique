@@ -82,3 +82,12 @@ export interface CustomerFilters {
   search?: string;
   type?: "REGULAR" | "VIP" | "WHOLESALE";
 }
+
+export interface activityLogFilters {
+  search?: string;
+}
+
+export interface InventoryLogFilters {
+  type?: InventoryType;
+  productId?: string;
+}

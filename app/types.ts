@@ -1,4 +1,8 @@
-import { InventoryType } from "@/generated/prisma/enums";
+import {
+  InventoryType,
+  OrderStatus,
+  PaymentStatus,
+} from "@/generated/prisma/enums";
 
 export type EditUserProps = {
   name: string;
@@ -90,4 +94,10 @@ export interface activityLogFilters {
 export interface InventoryLogFilters {
   type?: InventoryType;
   productId?: string;
+}
+
+export interface OrderFilters {
+  search?: string;
+  status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
 }

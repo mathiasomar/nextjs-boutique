@@ -5,10 +5,59 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { updateStock } from "./product";
-import { revalidatePath } from "next/cache";
+// import { revalidatePath } from "next/cache";
 import { OrderStatus, PaymentMethod } from "@/generated/prisma/enums";
-import { Item } from "../types";
+import { Item, OrderFilters } from "../types";
 import { Prisma } from "@/generated/prisma/client";
+
+export const getOrders = async (filters: OrderFilters) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const { search, paymentStatus, status } = filters;
+
+  const where: Prisma.OrderWhereInput = {};
+
+  if (search) {
+    where.OR = [
+      { orderNumber: { contains: search, mode: "insensitive" } },
+      { customer: { firstName: { contains: search, mode: "insensitive" } } },
+      { customer: { lastName: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
+  if (paymentStatus !== undefined) {
+    where.paymentStatus = paymentStatus;
+  }
+
+  if (status !== undefined) {
+    where.status = status;
+  }
+
+  try {
+    const orders = await prisma.order.findMany({
+      where,
+      include: {
+        items: true,
+        customer: { select: { id: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const serializedOrders = orders.map((order) => ({
+      ...order,
+      items: JSON.stringify(order.items),
+      total: order.total.toNumber(),
+    }));
+
+    return { success: true, orders: serializedOrders };
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return { error: "Error fetching orders" };
+  }
+};
 
 export const createOrder = async (
   formData: Prisma.OrderUncheckedCreateInput
@@ -81,7 +130,7 @@ export const createOrder = async (
       },
     });
 
-    revalidatePath("/dashboard/orders");
+    // revalidatePath("/dashboard/orders");
     return { success: true, order };
   } catch (error) {
     console.error("Create order error:", error);
@@ -132,8 +181,8 @@ export const updateOrderStatus = async (
       },
     });
 
-    revalidatePath("/dashboard/orders");
-    revalidatePath(`/dashboard/orders/${orderId}`);
+    // revalidatePath("/dashboard/orders");
+    // revalidatePath(`/dashboard/orders/${orderId}`);
     return { success: true, order };
   } catch (error) {
     console.error("Update order status error:", error);
@@ -201,8 +250,8 @@ export const createPayment = async (
       },
     });
 
-    revalidatePath("/dashboard/orders");
-    revalidatePath(`/dashboard/orders/${orderId}`);
+    // revalidatePath("/dashboard/orders");
+    // revalidatePath(`/dashboard/orders/${orderId}`);
     return { success: true, payment };
   } catch (error) {
     console.error("Create payment error:", error);

@@ -101,3 +101,33 @@ export interface OrderFilters {
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
 }
+
+export type ProductWithoutCategory = {
+  id: string | number;
+  sku: string;
+  price: number;
+  name: string;
+  images: Record<string, string>;
+};
+
+export type CartItemType = ProductWithoutCategory & {
+  productId: string;
+  quantity: number;
+  selectedSize: string;
+  selectedColor: string;
+  discout: number;
+  totalPrice: number;
+};
+
+export type CartItemsType = CartItemType[];
+
+export type CartStoreStateType = {
+  cart: CartItemsType;
+  hasHydrated: boolean;
+};
+
+export type CartStoreActionsType = {
+  addToCart: (product: CartItemType) => void;
+  removeFromCart: (product: CartItemType) => void;
+  clearCart: () => void;
+};

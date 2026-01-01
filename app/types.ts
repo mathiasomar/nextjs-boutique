@@ -31,7 +31,35 @@ export type Item = {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  selectedSize: string;
+  selectedColor: string;
 };
+
+export interface OrderItemInput {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice?: number;
+  selectedSize?: string;
+  selectedColor?: string;
+}
+
+export interface CreateOrderInput {
+  id?: string;
+  customerId: string;
+  discount?: number;
+  status?:
+    | "DRAFT"
+    | "PENDING"
+    | "CONFIRMED"
+    | "PROCESSING"
+    | "SHIPPED"
+    | "DELIVERED"
+    | "CANCELLED"
+    | "RETURNED";
+  paymentStatus?: "PENDING" | "PARTIAL" | "COMPLETED" | "FAILED" | "REFUNDED";
+  items: OrderItemInput[];
+}
 
 export type Items = Item[];
 
@@ -103,7 +131,7 @@ export interface OrderFilters {
 }
 
 export type ProductWithoutCategory = {
-  id: string | number;
+  id: string;
   sku: string;
   price: number;
   name: string;
@@ -115,7 +143,6 @@ export type CartItemType = ProductWithoutCategory & {
   quantity: number;
   selectedSize: string;
   selectedColor: string;
-  discout: number;
   totalPrice: number;
 };
 

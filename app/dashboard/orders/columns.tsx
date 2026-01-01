@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Wallet } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +20,6 @@ import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import Link from "next/link";
 import { Order } from "@/generated/prisma/client";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 
 export const columns: ColumnDef<Order>[] = [
   {
@@ -52,7 +51,13 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "customer.email",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Product Name" />
+      <DataTableColumnHeader column={column} title="Customer Email" />
+    ),
+  },
+  {
+    accessorKey: "createdByUser.name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created By" />
     ),
   },
   {
@@ -63,7 +68,7 @@ export const columns: ColumnDef<Order>[] = [
       return (
         <span
           className={cn(
-            "py-1 px-2 rounded-full text-white",
+            "py-1 px-2 rounded-full text-white text-sm",
             order.status === "DRAFT"
               ? "bg-green-300"
               : order.status === "PENDING"
@@ -75,7 +80,11 @@ export const columns: ColumnDef<Order>[] = [
               : "bg-red-500"
           )}
         >
-          {order.status}
+          {order.status
+            .toLowerCase()
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")}
         </span>
       );
     },
@@ -88,7 +97,7 @@ export const columns: ColumnDef<Order>[] = [
       return (
         <span
           className={cn(
-            "py-1 px-2 rounded-full text-white",
+            "py-1 px-2 rounded-full text-white text-sm",
             order.paymentStatus === "PENDING"
               ? "bg-gray-500"
               : order.paymentStatus === "PARTIAL"
@@ -98,7 +107,11 @@ export const columns: ColumnDef<Order>[] = [
               : "bg-red-500"
           )}
         >
-          {order.paymentStatus}
+          {order.paymentStatus
+            .toLowerCase()
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")}
         </span>
       );
     },
@@ -118,7 +131,7 @@ export const columns: ColumnDef<Order>[] = [
     ),
     cell: ({ row }) => {
       const order = row.original;
-      return <>Ksh.{format(order.orderDate, "dd/MM/yyyy HH:mm")}</>;
+      return <>{format(order.orderDate, "dd/MM/yyyy HH:mm")}</>;
     },
   },
   {
@@ -127,26 +140,33 @@ export const columns: ColumnDef<Order>[] = [
       const order = row.original;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(order.id.toString())}
-            >
-              Copy order ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href={`/dashboard/orders/${order.id}`}>View Order</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <Button variant={"outline"} size={"icon-sm"}>
+            <Wallet className="w-4 h-4" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigator.clipboard.writeText(order.id.toString())
+                }
+              >
+                Copy order ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href={`/dashboard/orders/${order.id}`}>View Order</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
     },
   },

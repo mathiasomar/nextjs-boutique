@@ -7,8 +7,9 @@ import { headers } from "next/headers";
 import { updateStock } from "./product";
 // import { revalidatePath } from "next/cache";
 import { OrderStatus, PaymentMethod } from "@/generated/prisma/enums";
-import { Item, OrderFilters } from "../types";
+import { CreateOrderInput, OrderFilters, OrderItemInput } from "../types";
 import { Prisma } from "@/generated/prisma/client";
+import { revalidatePath } from "next/cache";
 
 export const getOrders = async (filters: OrderFilters) => {
   const session = await auth.api.getSession({
@@ -42,6 +43,7 @@ export const getOrders = async (filters: OrderFilters) => {
       include: {
         items: true,
         customer: { select: { id: true, email: true } },
+        createdByUser: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -50,6 +52,10 @@ export const getOrders = async (filters: OrderFilters) => {
       ...order,
       items: JSON.stringify(order.items),
       total: order.total.toNumber(),
+      subtotal: order.subtotal.toNumber(),
+      tax: order.tax.toNumber(),
+      discount: order.discount.toNumber(),
+      shipping: order.shipping.toNumber(),
     }));
 
     return { success: true, orders: serializedOrders };
@@ -59,9 +65,71 @@ export const getOrders = async (filters: OrderFilters) => {
   }
 };
 
-export const createOrder = async (
-  formData: Prisma.OrderUncheckedCreateInput
-) => {
+export const getOrderById = async (id: string) => {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: { product: true },
+        },
+        customer: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+          },
+        },
+        createdByUser: { select: { id: true, name: true } },
+        payments: true,
+      },
+    });
+
+    if (!order) return null;
+
+    const serializedItems = order.items.map((item) => ({
+      ...item,
+      unitPrice: item.unitPrice.toNumber(),
+      totalPrice: item.totalPrice.toNumber(),
+      product: {
+        ...item.product,
+        price: item.product.price.toNumber(),
+        costPrice: item.product.costPrice.toNumber(),
+      },
+    }));
+
+    const serializedPayments = order.payments.map((payment) => ({
+      ...payment,
+      amount: payment.amount.toNumber(),
+    }));
+
+    return {
+      success: true,
+      order: {
+        ...order,
+        total: order.total.toNumber(),
+        subtotal: order.subtotal.toNumber(),
+        tax: order.tax.toNumber(),
+        discount: order.discount.toNumber(),
+        shipping: order.shipping.toNumber(),
+        items: serializedItems,
+        payments: serializedPayments,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return { error: "Error fetching orders" };
+  }
+};
+
+export const createOrder = async (formData: CreateOrderInput) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -73,50 +141,124 @@ export const createOrder = async (
       .toString(36)
       .substr(2, 4)}`;
 
+    // Validate that items exist
+    if (
+      !formData.items ||
+      !Array.isArray(formData.items) ||
+      formData.items.length === 0
+    ) {
+      return {
+        success: false,
+        error: "No items in order",
+        code: "NO_ITEMS",
+      };
+    }
+
     const customerId = formData.customerId as string;
-    const items = JSON.parse(formData.items as string);
+    const items: OrderItemInput[] = formData.items;
 
     // Calculate totals
+    // Calculate totals
     const subtotal = items.reduce(
-      (sum: number, item: Item) => sum + item.quantity * item.unitPrice,
+      (sum: number, item: OrderItemInput) =>
+        sum + item.quantity * item.unitPrice,
       0
     );
-    const tax = subtotal * 0.1; // 10% tax
-    const total = subtotal + tax;
+    const tax = 0; //  or calculate as needed: subtotal * 0.1
+    const discoutCal = (Number(formData.discount) * subtotal) / 100;
+    const total = subtotal + tax - discoutCal;
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        customerId,
-        status: "PENDING",
-        paymentStatus: "PENDING",
-        subtotal,
-        tax,
-        total,
-        createdBy: session.user.id,
-        items: {
-          create: items.map((item: Item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            totalPrice: item.quantity * item.unitPrice,
-          })),
-        },
-      },
-      include: {
-        items: true,
-      },
+    // Validate customer exists
+    const customer = await prisma.customer.findUnique({
+      where: { id: customerId },
     });
 
-    // Update inventory for each item
-    for (const item of items) {
-      await updateStock(
-        item.productId,
-        item.quantity,
-        "SALE",
-        `Order ${orderNumber}`
-      );
+    if (!customer) {
+      return {
+        success: false,
+        error: "Customer not found",
+        code: "CUSTOMER_NOT_FOUND",
+      };
     }
+
+    // Check stock availability before creating order
+    for (const item of items) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+
+      if (!product) {
+        return {
+          success: false,
+          error: `Product not found: ${item.productId}`,
+          code: "PRODUCT_NOT_FOUND",
+          productId: item.productId,
+        };
+      }
+
+      if (product.currentStock < item.quantity) {
+        return {
+          success: false,
+          error: `Insufficient stock for ${product.name}. Available: ${product.currentStock}, Requested: ${item.quantity}`,
+          code: "INSUFFICIENT_STOCK",
+          productId: product.id,
+          availableStock: product.currentStock,
+          productName: product.name,
+        };
+      }
+    }
+
+    // Create the order with transaction to ensure data consistency
+    const order = await prisma.$transaction(async (tx) => {
+      // Create the order
+      const newOrder = await tx.order.create({
+        data: {
+          orderNumber,
+          customerId,
+          status: formData.status || "PENDING",
+          paymentStatus: formData.paymentStatus || "PENDING",
+          subtotal,
+          discount: discoutCal,
+          tax,
+          total,
+          createdBy: session.user.id,
+        },
+      });
+
+      // Create order items
+      const orderItems = await Promise.all(
+        items.map(async (item: OrderItemInput) => {
+          const totalPrice = item.totalPrice || item.quantity * item.unitPrice;
+
+          // Update product stock
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              currentStock: {
+                decrement: item.quantity,
+              },
+            },
+          });
+
+          return tx.orderItem.create({
+            data: {
+              orderId: newOrder.id,
+              productId: item.productId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice,
+              selectedSize: item.selectedSize as string,
+              selectedColor: item.selectedColor as string,
+            },
+          });
+        })
+      );
+
+      return {
+        ...newOrder,
+        items: orderItems,
+      };
+    });
 
     // Log activity
     await prisma.activityLog.create({
@@ -126,15 +268,54 @@ export const createOrder = async (
         action: "CREATE_ORDER",
         entityType: "Order",
         entityId: order.id,
-        details: { orderNumber, total },
+        details: { orderNumber, total, customerId },
       },
     });
 
+    const serializedOrder = {
+      ...order,
+      total: order.total.toNumber(),
+      subtotal: order.subtotal.toNumber(),
+      tax: order.tax.toNumber(),
+      discount: order.discount.toNumber(),
+      shipping: order.shipping.toNumber(),
+      items: order.items.map((item) => ({
+        ...item,
+        unitPrice: item.unitPrice.toNumber(),
+        totalPrice: item.totalPrice.toNumber(),
+      })),
+    };
+
     // revalidatePath("/dashboard/orders");
-    return { success: true, order };
+    return { success: true, order: serializedOrder };
   } catch (error) {
     console.error("Create order error:", error);
-    return { error: "Failed to create order" };
+
+    // Handle specific error types
+    if (error instanceof Error) {
+      // Check for Prisma errors
+      if (error.message.includes("Unique constraint")) {
+        return {
+          success: false,
+          error: "Order with similar details already exists",
+          code: "DUPLICATE_ORDER",
+        };
+      }
+
+      if (error.message.includes("Foreign key constraint")) {
+        return {
+          success: false,
+          error: "Invalid customer or product reference",
+          code: "REFERENCE_ERROR",
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: "Failed to create order. Please try again.",
+      code: "UNKNOWN_ERROR",
+    };
   }
 };
 
@@ -181,9 +362,22 @@ export const updateOrderStatus = async (
       },
     });
 
-    // revalidatePath("/dashboard/orders");
-    // revalidatePath(`/dashboard/orders/${orderId}`);
-    return { success: true, order };
+    // Convert Decimal to numbers for serialization
+    const serializedOrder = {
+      ...order,
+      total: order.total.toNumber(),
+      subtotal: order.subtotal.toNumber(),
+      tax: order.tax.toNumber(),
+      discount: order.discount.toNumber(),
+      shipping: order.shipping.toNumber(),
+    };
+
+    revalidatePath("/dashboard/orders");
+    revalidatePath(`/dashboard/orders/${orderId}`);
+    return {
+      success: true,
+      order: serializedOrder,
+    };
   } catch (error) {
     console.error("Update order status error:", error);
     return { error: "Failed to update order status" };

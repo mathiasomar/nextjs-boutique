@@ -29,7 +29,6 @@ const ProductItem = ({ product }: { product: Product }) => {
   const [selectedSize, setSelectedSize] = useState(product.size[0]);
   const [selectedColor, setSelectedColor] = useState(product.color[0]);
   const [quantity, setQuantity] = useState(1);
-  const [discount, setDiscount] = useState(0);
 
   const { addToCart } = useCartStore();
 
@@ -52,9 +51,6 @@ const ProductItem = ({ product }: { product: Product }) => {
 
     const total = priceNumber * quantity;
 
-    const discountPrice = (total * discount) / 100;
-    const priceAfterDiscount = total - discountPrice;
-
     addToCart({
       ...product,
       productId: product.id,
@@ -62,8 +58,7 @@ const ProductItem = ({ product }: { product: Product }) => {
       selectedSize,
       selectedColor,
       price: priceNumber,
-      discout: discount,
-      totalPrice: priceAfterDiscount,
+      totalPrice: total,
     } as CartItemType);
 
     toast.success("Product Added to Cart");
@@ -138,17 +133,7 @@ const ProductItem = ({ product }: { product: Product }) => {
                     </SelectContent>
                   </Select>
                 </span>
-              </span>
-              <span className="flex flex-col gap-4">
-                <span>
-                  <label>Discount</label>
-                  <Input
-                    type="number"
-                    value={discount}
-                    onChange={(e) => setDiscount(Number(e.target.value))}
-                  />
-                </span>
-                <span>
+                <span className="flex items-center gap-2">
                   <label>Quantity</label>
                   <Input
                     type="number"

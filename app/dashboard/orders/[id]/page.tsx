@@ -1,0 +1,374 @@
+"use client";
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { AlertCircle } from "lucide-react";
+import { format, formatISO } from "date-fns";
+import { useParams } from "next/navigation";
+import { UserProfileSkeleton } from "@/components/loaders/user-profile-skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useOrder } from "@/hooks/use-order";
+import { cn } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import EditOrder from "@/components/edit-order";
+
+const OrderPage = () => {
+  const { id } = useParams();
+  // const result = await getuser(id);
+
+  // if (!result) {
+  //   notFound();
+  // }
+
+  // const user = result;
+
+  const { data, isLoading, error } = useOrder(id as string);
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error as string}</AlertDescription>
+      </Alert>
+    );
+  }
+  return (
+    <div>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dasboard">Dashboard</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard/orders">Orders</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>
+              {isLoading ? (
+                <p>Loading...</p>
+              ) : (
+                (data?.order as { orderNumber: string }).orderNumber ||
+                "Test ORD-23e1816"
+              )}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      {isLoading ? (
+        <UserProfileSkeleton />
+      ) : (
+        <div className="mt-4 flex flex-col xl:flex-row gap-8">
+          {/* LEFT */}
+          <div className="w-full xl:w-1/3 space-y-6">
+            {/* INFORMATION CONTAINER */}
+            <div className="bg-primary-foreground p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-semibold">Order Information</h1>
+                <EditOrder orderId={id as string} />
+              </div>
+              <div className="space-y-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Customer:</span>
+                  <span>
+                    {data?.order?.customer?.firstName || "Test Customer"}{" "}
+                    {data?.order?.customer?.lastName || "Test Customer"}(
+                    {data?.order?.customer?.email || "Test Customer"})
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Order Number:</span>
+                  <span className="font-bold text-lg">
+                    {data?.order?.orderNumber || "Test ORD-23e1816"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Order Status:</span>
+                  <span
+                    className={cn(
+                      "py-1 px-2 rounded-full text-white text-sm",
+                      data?.order?.status === "DRAFT"
+                        ? "bg-green-300"
+                        : data?.order?.status === "PENDING"
+                        ? "bg-gray-500"
+                        : data?.order?.status === "PROCESSING" ||
+                          data?.order?.status === "SHIPPED"
+                        ? "bg-orange-400"
+                        : data?.order?.status === "DELIVERED" ||
+                          data?.order?.status === "CONFIRMED"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    )}
+                  >
+                    {
+                      (data?.order?.status
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ") || "") as string
+                    }
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Payment Status:</span>
+                  <span
+                    className={cn(
+                      "py-1 px-2 rounded-full text-white text-sm",
+                      data?.order?.paymentStatus === "PENDING"
+                        ? "bg-gray-500"
+                        : data?.order?.paymentStatus === "PARTIAL"
+                        ? "bg-orange-400"
+                        : data?.order?.paymentStatus === "COMPLETED"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    )}
+                  >
+                    {
+                      (data?.order?.paymentStatus
+                        .toLowerCase()
+                        .split(" ")
+                        .map(
+                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ") || "") as string
+                    }
+                  </span>
+                </div>
+                {/* <div className="flex items-center gap-2">
+                  <span className="font-bold">Sub Total:</span>
+                  <span>
+                    Ksh.
+                    {data?.order?.subtotal.toFixed(2) || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Tax:</span>
+                  <span>
+                    Ksh.
+                    {data?.order?.tax.toFixed(2) || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Discount:</span>
+                  <span>
+                    Ksh.
+                    {data?.order?.discount.toFixed(2) || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Total Payable:</span>
+                  <span>
+                    Ksh.
+                    {data?.order?.total.toFixed(2) || 0}
+                  </span>
+                </div> */}
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Created At:</span>
+                  <span>
+                    {formatISO(data?.order?.orderDate as Date, {
+                      representation: "date",
+                    })}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Update At:</span>
+                  <span>
+                    {formatISO(data?.order?.updatedAt as Date, {
+                      representation: "date",
+                    })}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Estimated Delivery Date:</span>
+                  <span>
+                    {data?.order?.estimatedDelivery
+                      ? formatISO(data?.order?.estimatedDelivery as Date, {
+                          representation: "date",
+                        })
+                      : "No Delivery Date"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Delivery Date:</span>
+                  <span>
+                    {data?.order?.deliveredAt
+                      ? formatISO(data?.order?.deliveredAt as Date, {
+                          representation: "date",
+                        })
+                      : "Not Delivered"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Cancelled On:</span>
+                  <span>
+                    {data?.order?.cancelledAt
+                      ? formatISO(data?.order?.cancelledAt as Date, {
+                          representation: "date",
+                        })
+                      : "Not Cancelled"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Notes:</span>
+                  <span>{data?.order?.notes || "No Notes"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* RIGHT */}
+          <div className="w-full xl:w-2/3 space-y-6">
+            {/* THE CHART CONTAINER */}
+            <div className="bg-primary-foreground p-4 rounded-lg">
+              <h1 className="text-xl font-semibold">Order Items</h1>
+              <Table>
+                <TableCaption>A list of your order items</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">SKU</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Selected Size</TableHead>
+                    <TableHead>Selected Color</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Quantity</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.isArray(data?.order?.items) ? (
+                    data?.order?.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium">
+                          {item.product.sku}
+                        </TableCell>
+                        <TableCell>{item.product.name}</TableCell>
+                        <TableCell>{item.selectedSize}</TableCell>
+                        <TableCell>{item.selectedColor}</TableCell>
+                        <TableCell>Ksh.{item.unitPrice.toFixed(2)}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell className="text-right">
+                          Ksh.{item.totalPrice.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        No order items.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={5}>Total</TableCell>
+                    <TableCell className="text-right" colSpan={2}>
+                      Ksh.
+                      {data?.order?.subtotal.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={5}>Tax</TableCell>
+                    <TableCell className="text-right" colSpan={2}>
+                      Ksh.
+                      {data?.order?.tax.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={5}>Discout</TableCell>
+                    <TableCell className="text-right" colSpan={2}>
+                      Ksh.
+                      {data?.order?.discount.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={5}>Grand Total</TableCell>
+                    <TableCell className="text-right" colSpan={2}>
+                      Ksh.
+                      {data?.order?.total.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </div>
+            <div className="bg-primary-foreground p-4 rounded-lg mt-4">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-semibold">Payments</h1>
+                <Button>Pay</Button>
+              </div>
+              <Table>
+                <TableCaption>A list of Payments</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Trasaction ID</TableHead>
+                    <TableHead>Payment Method</TableHead>
+                    <TableHead>Payment Status</TableHead>
+                    <TableHead>Processed By</TableHead>
+                    <TableHead className="text-right">Processed At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.isArray(data?.order?.payments) ? (
+                    data?.order?.payments.map((pay) => (
+                      <TableRow key={pay.id}>
+                        <TableCell className="font-medium">
+                          {pay.transactionId}
+                        </TableCell>
+                        <TableCell>{pay.method}</TableCell>
+                        <TableCell>{pay.status}</TableCell>
+                        <TableCell>{pay.processedBy}</TableCell>
+                        <TableCell className="text-right">
+                          {format(pay.processedAt, "dd/MM/yyyy HH:mm")}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">
+                        No payments.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={3}>Grand Total</TableCell>
+                    <TableCell className="text-right" colSpan={2}>
+                      Ksh.
+                      {data?.order?.payments
+                        ? data.order.payments
+                            .reduce((acc, pay) => acc + pay.amount, 0)
+                            .toFixed(2)
+                        : "0.00"}
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default OrderPage;

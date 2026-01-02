@@ -13,21 +13,9 @@ import {
   PaymentMethod,
   PaymentStatus,
 } from "@/generated/prisma/enums";
+import { CustomError } from "@/lib/error-class";
 import { Decimal } from "@prisma/client/runtime/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-// Custom error class for consistent error handling
-export class OrderError extends Error {
-  code?: string;
-  details?: unknown;
-
-  constructor(message: string, code?: string, details?: unknown) {
-    super(message);
-    this.name = "OrderError";
-    this.code = code;
-    this.details = details;
-  }
-}
 
 export interface OrderResponse {
   id: string;
@@ -114,14 +102,14 @@ export const useCreateOrder = () => {
       const result = await createOrder(data);
       // If the server action returns an error, throw it as a custom error
       if (!result.success) {
-        throw new OrderError(
+        throw new CustomError(
           result.error || "Failed to create order",
           result.code
         );
       }
 
       if (!result.order) {
-        throw new OrderError("Order creation failed", "NO_ORDER_RETURNED");
+        throw new CustomError("Order creation failed", "NO_ORDER_RETURNED");
       }
 
       return result.order;
@@ -131,7 +119,7 @@ export const useCreateOrder = () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
-    onError: (error: OrderError) => {
+    onError: (error: CustomError) => {
       // Log error to your error tracking service
       console.error("Order creation mutation error:", {
         message: error.message,

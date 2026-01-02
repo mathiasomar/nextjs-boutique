@@ -1,26 +1,30 @@
 "use client";
+import { getPayments } from "@/app/actions/payment";
+import { PaymentMethod, PaymentStatus } from "@/generated/prisma/enums";
+import { Decimal } from "@prisma/client/runtime/client";
+import { useQuery } from "@tanstack/react-query";
 
-import { initiateMpesaPayment } from "@/app/actions/payment";
-import { Prisma } from "@/generated/prisma/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-export const useCreatePayment = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (formData: Prisma.PaymentUncheckedCreateInput) => {
-      const result = await initiateMpesaPayment(formData);
-      if (!result.success) {
-        throw new Error(result.message);
+export const usePayments = (filters?: {
+  startDate?: string;
+  endDate?: string;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: PaymentMethod;
+}) => {
+  return useQuery({
+    queryKey: ["payments", filters],
+    queryFn: async () => {
+      const result = await getPayments(filters);
+      if (!result) {
+        throw new Error("Payments not found");
       }
-      return result;
+
+      const payments = result.payments?.map((payment) => ({
+        ...payment,
+        amount: new Decimal(payment.amount.toString() || 0),
+      }));
+
+      return { ...result, payments };
     },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["payments"] });
-      queryClient.setQueryData(["payments", variables.id], data);
-    },
-    onError: (error: Error) => {
-      console.error(`Payment failed: ${error.message}`);
-    },
+    keepPreviousData: true,
   });
 };

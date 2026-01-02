@@ -83,12 +83,26 @@ export const addCustomer = async (
   });
 
   if (checkCustomerExists) {
-    return { error: "Customer already exists" };
+    return {
+      success: false,
+      error: "Customer already exists",
+      code: "CUSTOMER_EXISTS",
+      customerId: checkCustomerExists.id,
+    };
   }
+
   try {
     const customer = await prisma.customer.create({
       data: validatedData.data!,
     });
+
+    if (!customer) {
+      return {
+        success: false,
+        error: "Failed to create customer",
+        code: "CUSTOMER_CREATION_FAILED",
+      };
+    }
 
     // Log activity
     await prisma.activityLog.create({
@@ -105,7 +119,24 @@ export const addCustomer = async (
     return customer;
   } catch (error) {
     console.error("Error adding customer:", error);
-    return { error: "Error adding customer" };
+
+    // Handle specific error types
+    if (error instanceof Error) {
+      // Check for Prisma errors
+      if (error.message.includes("Unique constraint")) {
+        return {
+          success: false,
+          error: "Customer with similar details already exists",
+          code: "DUPLICATE_CUSTOMER",
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: "Failed to create customer. Please try again.",
+      code: "UNKNOWN_ERROR",
+    };
   }
 };
 
@@ -188,6 +219,14 @@ export const updateCustomer = async (
       data: validatedData.data!,
     });
 
+    if (!customer) {
+      return {
+        success: false,
+        error: "Failed to updtae customer",
+        code: "CUSTOMER_UPDATE_FAILED",
+      };
+    }
+
     // Log activity
     await prisma.activityLog.create({
       data: {
@@ -203,7 +242,24 @@ export const updateCustomer = async (
     return customer;
   } catch (error) {
     console.error("Error updating customer:", error);
-    return { error: "Error updating customer" };
+
+    // Handle specific error types
+    if (error instanceof Error) {
+      // Check for Prisma errors
+      if (error.message.includes("Unique constraint")) {
+        return {
+          success: false,
+          error: "Customer with similar details already exists",
+          code: "DUPLICATE_CUSTOMER",
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: "Failed to create customer. Please try again.",
+      code: "UNKNOWN_ERROR",
+    };
   }
 };
 

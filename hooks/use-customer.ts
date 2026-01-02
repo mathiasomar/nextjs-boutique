@@ -6,6 +6,7 @@ import {
   updateCustomer,
 } from "@/app/actions/customer";
 import { Customer, Prisma } from "@/generated/prisma/client";
+import { CustomError } from "@/lib/error-class";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useCustomers = (filters?: {
@@ -46,14 +47,26 @@ export const useCreateCustomer = () => {
       data: Prisma.CustomerUncheckedCreateInput
     ): Promise<Customer | { error: string }> => {
       const result = await addCustomer(data);
+
       if (!result) {
-        throw new Error("Failed to add category");
+        throw new CustomError(
+          "Customer creation failed",
+          "NO_CUSTOMER_RETURNED"
+        );
       }
 
       return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+    onError: (error: CustomError) => {
+      // Log error to your error tracking service
+      console.error("Customer creation mutation error:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+      });
     },
   });
 };
@@ -68,13 +81,21 @@ export const useUpdateCustomer = () => {
     }: Partial<Customer> & { id: string }): Promise<Customer> => {
       const result = await updateCustomer(id, data);
       if (!result) {
-        throw new Error("User not found");
+        throw new CustomError("Customer update failed", "NO_CUSTOMER_RETURNED");
       }
       return result as Customer;
     },
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["customers", variables.id], data);
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+    onError: (error: CustomError) => {
+      // Log error to your error tracking service
+      console.error("Customer update mutation error:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+      });
     },
   });
 };

@@ -29,6 +29,7 @@ import toast from "react-hot-toast";
 import { Alert, AlertTitle } from "./ui/alert";
 import { useState } from "react";
 import { useCreateCustomer } from "@/hooks/use-customer";
+import { CustomError } from "@/lib/error-class";
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First Name must be at least 2 characters!"),
@@ -82,7 +83,19 @@ const AddCustomer = () => {
           toast.success("Customer added successfully!");
         },
         onError: (error) => {
-          toast.error(error as string);
+          // Error is already handled by react-hot-toast in onError,
+          // but we can add additional UI feedback here
+          console.error("Customer submission error:", error);
+
+          // Show specific UI feedback based on error type
+          const orderError = error as CustomError;
+
+          if (orderError.code === "UNAUTHORIZED") {
+            toast.error("Please log in to complete your order", {
+              duration: 5000,
+            });
+          }
+          // Other errors are handled by the default toast in onError
         },
       });
     } catch (error) {
@@ -103,7 +116,7 @@ const AddCustomer = () => {
             <div className="my-2">
               <Alert variant={"destructive"}>
                 <AlertCircleIcon />
-                <AlertTitle>{addCustomerMutation.error as string}</AlertTitle>
+                <AlertTitle>{addCustomerMutation.error.message}</AlertTitle>
               </Alert>
             </div>
           )}

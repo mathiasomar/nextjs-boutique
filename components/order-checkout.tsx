@@ -30,9 +30,10 @@ import { useState } from "react";
 import { useCustomers } from "@/hooks/use-customer";
 import useCartStore from "@/store/cart-store";
 import { Spinner } from "./ui/spinner";
-import { OrderError, useCreateOrder } from "@/hooks/use-order";
+import { useCreateOrder } from "@/hooks/use-order";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
+import { CustomError } from "@/lib/error-class";
 
 const formSchema = z.object({
   customerId: z.string(),
@@ -109,7 +110,7 @@ const OrderCheckout = () => {
             console.error("Order submission error:", error);
 
             // Show specific UI feedback based on error type
-            const orderError = error as OrderError;
+            const orderError = error as CustomError;
 
             if (orderError.code === "INSUFFICIENT_STOCK") {
               // You could highlight out-of-stock items in the cart
@@ -133,7 +134,7 @@ const OrderCheckout = () => {
     }
   };
 
-  const error = addOrderMutation.error as OrderError;
+  const error = addOrderMutation.error as CustomError;
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>

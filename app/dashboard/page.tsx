@@ -50,9 +50,11 @@ const HomePage = async () => {
           <h2 className="text-sm text-muted-foreground">Total Customers</h2>
           <p className="text-2xl font-semibold">{customers}</p>
         </div>
-        <div className="bg-primary-foreground border p-4 rounded-lg col-span-4 sm:col-span-2 md:col-span-1">
-          <h2 className="text-sm text-muted-foreground">Low Stock Products</h2>
-          <p className="text-2xl font-semibold">{lowStockProducts.length}</p>
+        <div className="bg-red-500 border-red-200 p-4 rounded-lg col-span-4 sm:col-span-2 md:col-span-1">
+          <h2 className="text-sm text-gray-300">Low Stock Products</h2>
+          <p className="text-2xl font-semibold text-white">
+            {lowStockProducts.length}
+          </p>
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
@@ -60,7 +62,7 @@ const HomePage = async () => {
           <AppBarChart />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg">
-          <CardList title="Latest Transactions" />
+          <CardList title="Latest Orders" />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg">
           <AppPieChart />

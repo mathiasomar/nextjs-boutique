@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  CreditCard,
   Home,
   LineChart,
   Logs,
   Settings,
   Shirt,
   ShoppingBasket,
+  TrendingDown,
   User2,
   Users,
 } from "lucide-react";
@@ -52,6 +54,16 @@ const items = [
     title: "Orders",
     url: "/dashboard/orders",
     icon: ShoppingBasket,
+  },
+  {
+    title: "Expenses",
+    url: "/dashboard/expenses",
+    icon: TrendingDown,
+  },
+  {
+    title: "Payments",
+    url: "/dashboard/payments",
+    icon: CreditCard,
   },
   {
     title: "Analytics",

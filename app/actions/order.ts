@@ -42,6 +42,7 @@ export const getOrders = async (filters: OrderFilters) => {
       where,
       include: {
         items: true,
+        _count: { select: { items: true } },
         customer: { select: { id: true, email: true } },
         createdByUser: { select: { id: true, name: true } },
       },
@@ -55,6 +56,8 @@ export const getOrders = async (filters: OrderFilters) => {
       subtotal: order.subtotal.toNumber(),
       tax: order.tax.toNumber(),
       discount: order.discount.toNumber(),
+      paid: order.paid.toNumber(),
+      balance: order.balance.toNumber(),
       shipping: order.shipping.toNumber(),
     }));
 
@@ -119,6 +122,8 @@ export const getOrderById = async (id: string) => {
         tax: order.tax.toNumber(),
         discount: order.discount.toNumber(),
         shipping: order.shipping.toNumber(),
+        paid: order.paid.toNumber(),
+        balance: order.balance.toNumber(),
         items: serializedItems,
         payments: serializedPayments,
       },
@@ -221,6 +226,8 @@ export const createOrder = async (formData: CreateOrderInput) => {
           discount: discoutCal,
           tax,
           total,
+          paid: 0.0,
+          balance: total,
           createdBy: session.user.id,
         },
       });
@@ -279,6 +286,8 @@ export const createOrder = async (formData: CreateOrderInput) => {
       tax: order.tax.toNumber(),
       discount: order.discount.toNumber(),
       shipping: order.shipping.toNumber(),
+      paid: order.paid.toNumber(),
+      balance: order.balance.toNumber(),
       items: order.items.map((item) => ({
         ...item,
         unitPrice: item.unitPrice.toNumber(),
@@ -370,6 +379,8 @@ export const updateOrderStatus = async (
       tax: order.tax.toNumber(),
       discount: order.discount.toNumber(),
       shipping: order.shipping.toNumber(),
+      paid: order.paid.toNumber(),
+      balance: order.balance.toNumber(),
     };
 
     revalidatePath("/dashboard/orders");
@@ -410,7 +421,7 @@ export const createPayment = async (
         method,
         status: "COMPLETED",
         transactionId: `TXN-${Date.now()}`,
-        processedBy: session.user.id,
+        processedBy: session.user.email,
       },
     });
 
@@ -420,8 +431,11 @@ export const createPayment = async (
       _sum: { amount: true },
     });
 
+    const paid = Number(totalPaid._sum.amount) || 0;
+    const balance = Number(order.total) - paid;
+
     const paymentStatus =
-      totalPaid._sum.amount! >= order.total
+      Number(totalPaid._sum.amount) >= Number(order.total)
         ? "COMPLETED"
         : Number(totalPaid._sum.amount) > 0
         ? "PARTIAL"
@@ -429,7 +443,7 @@ export const createPayment = async (
 
     await prisma.order.update({
       where: { id: orderId },
-      data: { paymentStatus },
+      data: { paymentStatus, paid, balance },
     });
 
     // Log activity
@@ -446,7 +460,13 @@ export const createPayment = async (
 
     // revalidatePath("/dashboard/orders");
     // revalidatePath(`/dashboard/orders/${orderId}`);
-    return { success: true, payment };
+    return {
+      success: true,
+      payment: {
+        ...payment,
+        amount: payment.amount.toNumber(),
+      },
+    };
   } catch (error) {
     console.error("Create payment error:", error);
     return { error: "Failed to create payment" };

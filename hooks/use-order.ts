@@ -2,12 +2,17 @@
 
 import {
   createOrder,
+  createPayment,
   getOrderById,
   getOrders,
   updateOrderStatus,
 } from "@/app/actions/order";
 import { CreateOrderInput, OrderFilters } from "@/app/types";
-import { OrderStatus, PaymentStatus } from "@/generated/prisma/enums";
+import {
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "@/generated/prisma/enums";
 import { Decimal } from "@prisma/client/runtime/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -65,16 +70,18 @@ export const useOrders = (filters?: {
 
       const orders = result.orders?.map((order) => ({
         ...order,
-        total: new Decimal(order.total.toString()),
-        subtotal: new Decimal(order.subtotal.toString()),
-        tax: new Decimal(order.tax.toString()),
-        discount: new Decimal(order.discount.toString()),
-        shipping: new Decimal(order.shipping.toString()),
+        total: new Decimal(order.total.toString() || 0),
+        subtotal: new Decimal(order.subtotal.toString()) || 0,
+        tax: new Decimal(order.tax.toString()) || 0,
+        discount: new Decimal(order.discount.toString()) || 0,
+        shipping: new Decimal(order.shipping.toString()) || 0,
+        paid: new Decimal(order.paid.toString()) || 0,
+        balance: new Decimal(order.balance.toString()) || 0,
         items: Array.isArray(order.items)
           ? order.items.map((item) => ({
               ...item,
-              unitPrice: new Decimal(item.unitPrice.toString()),
-              totalPrice: new Decimal(item.totalPrice.toString()),
+              unitPrice: new Decimal(item.unitPrice.toString()) || 0,
+              totalPrice: new Decimal(item.totalPrice.toString()) || 0,
             }))
           : [],
       }));
@@ -155,6 +162,43 @@ export const useUpdateOrder = () => {
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["orders", variables.id], data);
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (error: Error) => {
+      // Log error to your error tracking service
+      console.error("Order update mutation error:", error.message);
+    },
+  });
+};
+
+export const useMakePayment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      amount,
+      method,
+    }: {
+      orderId: string;
+      amount: number;
+      method: PaymentMethod;
+    }) => {
+      const result = await createPayment(orderId, amount, method);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return {
+        ...result,
+        amount: new Decimal(result.payment.amount.toString()),
+      };
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.setQueryData(["orders", variables.orderId], data);
+    },
+    onError: (error: Error) => {
+      console.error(`Payment failed: ${error.message}`);
     },
   });
 };

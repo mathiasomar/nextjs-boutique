@@ -25,16 +25,16 @@ const HomePage = async () => {
     }),
   ]);
 
-  const today = new Date();
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  // const today = new Date();
+  // const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-  const monthlySales = await prisma.order.aggregate({
-    where: {
-      orderDate: { gte: startOfMonth },
-      paymentStatus: "COMPLETED",
-    },
-    _sum: { total: true },
-  });
+  // const monthlySales = await prisma.order.aggregate({
+  //   where: {
+  //     orderDate: { gte: startOfMonth },
+  //     paymentStatus: "COMPLETED",
+  //   },
+  //   _sum: { total: true },
+  // });
   return (
     <div className="flex flex-col gap-4">
       <div className="w-full grid grid-cols-4 gap-4">

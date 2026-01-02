@@ -78,6 +78,10 @@ export const columns: ColumnDef<Product>[] = [
     ),
   },
   {
+    accessorKey: "category.name",
+    header: "Category",
+  },
+  {
     accessorKey: "currentStock",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Current Stock" />

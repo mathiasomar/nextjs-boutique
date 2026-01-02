@@ -54,7 +54,7 @@ const ProductItem = ({ product }: { product: Product }) => {
     addToCart({
       ...product,
       productId: product.id,
-      quantity: 1,
+      quantity: quantity,
       selectedSize,
       selectedColor,
       price: priceNumber,
@@ -70,9 +70,8 @@ const ProductItem = ({ product }: { product: Product }) => {
           <ItemMedia>
             <Image
               src={
-                (product.images as Record<string, string>)?.[
-                  product.color[0]
-                ] || "/noimage.png"
+                (product.images as Record<string, string>)?.[selectedColor] ||
+                "/noimage.png"
               }
               alt=""
               width={80}

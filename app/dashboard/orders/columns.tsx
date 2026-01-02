@@ -2,11 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Wallet } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-import { Checkbox } from "@/components/ui/checkbox";
 
 import {
   DropdownMenu,
@@ -18,32 +16,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import Link from "next/link";
-import { Order } from "@/generated/prisma/client";
 import { format } from "date-fns";
+import PaymentForm from "@/components/payment-form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Order } from "@/generated/prisma/client";
 
 export const columns: ColumnDef<Order>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "orderNumber",
     header: "Order Number",
@@ -59,6 +59,10 @@ export const columns: ColumnDef<Order>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Created By" />
     ),
+  },
+  {
+    accessorKey: "_count.items",
+    header: "Items",
   },
   {
     accessorKey: "status",
@@ -125,6 +129,22 @@ export const columns: ColumnDef<Order>[] = [
     },
   },
   {
+    accessorKey: "paid",
+    header: "Paid Amount",
+    cell: ({ row }) => {
+      const order = row.original;
+      return <>Ksh.{order.paid.toFixed(2)}</>;
+    },
+  },
+  {
+    accessorKey: "balance",
+    header: "Balance",
+    cell: ({ row }) => {
+      const order = row.original;
+      return <>Ksh.{order.balance.toFixed(2)}</>;
+    },
+  },
+  {
     accessorKey: "orderDate",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Order Date" />
@@ -141,9 +161,7 @@ export const columns: ColumnDef<Order>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          <Button variant={"outline"} size={"icon-sm"}>
-            <Wallet className="w-4 h-4" />
-          </Button>
+          <PaymentForm orderId={order.id} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">

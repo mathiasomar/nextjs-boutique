@@ -25,8 +25,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import EditOrder from "@/components/edit-order";
+import PaymentForm from "@/components/payment-form";
 
 const OrderPage = () => {
   const { id } = useParams();
@@ -66,8 +66,7 @@ const OrderPage = () => {
               {isLoading ? (
                 <p>Loading...</p>
               ) : (
-                (data?.order as { orderNumber: string }).orderNumber ||
-                "Test ORD-23e1816"
+                data?.order?.orderNumber || "Test ORD-23e1816"
               )}
             </BreadcrumbPage>
           </BreadcrumbItem>
@@ -183,9 +182,27 @@ const OrderPage = () => {
                   </span>
                 </div> */}
                 <div className="flex items-center gap-2">
+                  <span className="font-bold">Total Amount:</span>
+                  <span className="font-bold text-blue-700">
+                    Ksh.{data?.order?.total.toFixed(2) || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Paid:</span>
+                  <span className="text-green-800 font-bold">
+                    Ksh.{data?.order?.paid.toFixed(2) || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Balance:</span>
+                  <span className="text-orange-600 font-bold">
+                    Ksh.{data?.order?.balance.toFixed(2) || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
                   <span className="font-bold">Created At:</span>
                   <span>
-                    {formatISO(data?.order?.orderDate as Date, {
+                    {formatISO(data?.order?.orderDate ?? new Date(), {
                       representation: "date",
                     })}
                   </span>
@@ -193,7 +210,7 @@ const OrderPage = () => {
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Update At:</span>
                   <span>
-                    {formatISO(data?.order?.updatedAt as Date, {
+                    {formatISO(data?.order?.updatedAt ?? new Date(), {
                       representation: "date",
                     })}
                   </span>
@@ -202,9 +219,12 @@ const OrderPage = () => {
                   <span className="font-bold">Estimated Delivery Date:</span>
                   <span>
                     {data?.order?.estimatedDelivery
-                      ? formatISO(data?.order?.estimatedDelivery as Date, {
-                          representation: "date",
-                        })
+                      ? formatISO(
+                          data?.order?.estimatedDelivery ?? new Date(),
+                          {
+                            representation: "date",
+                          }
+                        )
                       : "No Delivery Date"}
                   </span>
                 </div>
@@ -212,7 +232,7 @@ const OrderPage = () => {
                   <span className="font-bold">Delivery Date:</span>
                   <span>
                     {data?.order?.deliveredAt
-                      ? formatISO(data?.order?.deliveredAt as Date, {
+                      ? formatISO(data?.order?.deliveredAt ?? new Date(), {
                           representation: "date",
                         })
                       : "Not Delivered"}
@@ -222,7 +242,7 @@ const OrderPage = () => {
                   <span className="font-bold">Cancelled On:</span>
                   <span>
                     {data?.order?.cancelledAt
-                      ? formatISO(data?.order?.cancelledAt as Date, {
+                      ? formatISO(data?.order?.cancelledAt ?? new Date(), {
                           representation: "date",
                         })
                       : "Not Cancelled"}
@@ -313,7 +333,7 @@ const OrderPage = () => {
             <div className="bg-primary-foreground p-4 rounded-lg mt-4">
               <div className="flex items-center justify-between">
                 <h1 className="text-xl font-semibold">Payments</h1>
-                <Button>Pay</Button>
+                <PaymentForm orderId={id as string} />
               </div>
               <Table>
                 <TableCaption>A list of Payments</TableCaption>
@@ -323,7 +343,8 @@ const OrderPage = () => {
                     <TableHead>Payment Method</TableHead>
                     <TableHead>Payment Status</TableHead>
                     <TableHead>Processed By</TableHead>
-                    <TableHead className="text-right">Processed At</TableHead>
+                    <TableHead>Processed At</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -336,14 +357,17 @@ const OrderPage = () => {
                         <TableCell>{pay.method}</TableCell>
                         <TableCell>{pay.status}</TableCell>
                         <TableCell>{pay.processedBy}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>
                           {format(pay.processedAt, "dd/MM/yyyy HH:mm")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ksh.{pay.amount.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
+                      <TableCell colSpan={4} className="h-24 text-center">
                         No payments.
                       </TableCell>
                     </TableRow>
@@ -351,7 +375,7 @@ const OrderPage = () => {
                 </TableBody>
                 <TableFooter>
                   <TableRow>
-                    <TableCell colSpan={3}>Grand Total</TableCell>
+                    <TableCell colSpan={4}>Grand Total</TableCell>
                     <TableCell className="text-right" colSpan={2}>
                       Ksh.
                       {data?.order?.payments

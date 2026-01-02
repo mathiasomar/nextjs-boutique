@@ -228,13 +228,13 @@ const OrderCheckout = () => {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Order Status</FieldLabel>
+                      <FieldLabel>Payment Status</FieldLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <SelectTrigger aria-invalid={fieldState.invalid}>
-                          <SelectValue placeholder="Select Order Status" />
+                          <SelectValue placeholder="Select Payment Status" />
                         </SelectTrigger>
 
                         <SelectContent>

@@ -39,6 +39,7 @@ enum PaymentStatus {
 
 enum PaymentMethod {
   CASH
+  MPESA
   CARD
   BANK_TRANSFER
   PAYPAL
@@ -244,6 +245,8 @@ model Order {
   discount Decimal @default(0) @db.Decimal(10, 2)
   shipping Decimal @default(0) @db.Decimal(10, 2)
   total    Decimal @db.Decimal(10, 2)
+  paid     Decimal @default(0) @db.Decimal(10, 2)
+  balance  Decimal @default(0) @db.Decimal(10, 2)
 
   // Shipping/Delivery
   shippingAddress String?
@@ -316,7 +319,7 @@ model InventoryLog {
 
 model Payment {
   id            String        @id @default(cuid())
-  order         Order         @relation(fields: [orderId], references: [id])
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId       String
   amount        Decimal       @db.Decimal(10, 2)
   method        PaymentMethod

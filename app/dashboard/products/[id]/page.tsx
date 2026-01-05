@@ -172,22 +172,21 @@ const ProductPage = () => {
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Price:</span>
                   <span>
-                    Ksh.
-                    {(data?.product &&
-                      data?.product &&
-                      (data!.product as { price: Decimal }).price.toFixed(2)) ||
-                      0}
+                    {data?.product &&
+                      new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "Ksh",
+                      }).format(data.product.price.toNumber() || 0)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Cost Price:</span>
                   <span>
-                    Ksh.
-                    {(data?.product &&
-                      (
-                        data!.product as { costPrice: Decimal }
-                      ).costPrice.toFixed(2)) ||
-                      0}
+                    {data?.product &&
+                      new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "Ksh",
+                      }).format(data.product.costPrice.toNumber() || 0)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

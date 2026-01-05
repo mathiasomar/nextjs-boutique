@@ -93,8 +93,12 @@ export const columns: ColumnDef<Product>[] = [
       <DataTableColumnHeader column={column} title="Product Price" />
     ),
     cell: ({ row }) => {
-      const product = row.original;
-      return <>Ksh.{product.price.toFixed(2)}</>;
+      const price = parseFloat(row.getValue("price"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "Ksh",
+      }).format(price);
+      return <div className="text-right font-medium">{formatted}</div>;
     },
   },
   {
@@ -103,8 +107,12 @@ export const columns: ColumnDef<Product>[] = [
       <DataTableColumnHeader column={column} title="Product Cost Price" />
     ),
     cell: ({ row }) => {
-      const product = row.original;
-      return <>Ksh.{product.costPrice.toFixed(2)}</>;
+      const costPrice = parseFloat(row.getValue("costPrice"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "Ksh",
+      }).format(costPrice);
+      return <div className="text-right font-medium">{formatted}</div>;
     },
   },
   {

@@ -184,19 +184,28 @@ const OrderPage = () => {
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Total Amount:</span>
                   <span className="font-bold text-blue-700">
-                    Ksh.{data?.order?.total.toFixed(2) || 0}
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "Ksh",
+                    }).format(data?.order?.total || 0)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Paid:</span>
                   <span className="text-green-800 font-bold">
-                    Ksh.{data?.order?.paid.toFixed(2) || 0}
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "Ksh",
+                    }).format(data?.order?.paid || 0)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Balance:</span>
                   <span className="text-orange-600 font-bold">
-                    Ksh.{data?.order?.balance.toFixed(2) || 0}
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "Ksh",
+                    }).format(data?.order?.balance || 0)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -283,10 +292,18 @@ const OrderPage = () => {
                         <TableCell>{item.product.name}</TableCell>
                         <TableCell>{item.selectedSize}</TableCell>
                         <TableCell>{item.selectedColor}</TableCell>
-                        <TableCell>Ksh.{item.unitPrice.toFixed(2)}</TableCell>
+                        <TableCell>
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "Ksh",
+                          }).format(item.unitPrice || 0)}
+                        </TableCell>
                         <TableCell>{item.quantity}</TableCell>
                         <TableCell className="text-right">
-                          Ksh.{item.totalPrice.toFixed(2)}
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "Ksh",
+                          }).format(item.totalPrice || 0)}
                         </TableCell>
                       </TableRow>
                     ))
@@ -302,29 +319,37 @@ const OrderPage = () => {
                   <TableRow>
                     <TableCell colSpan={5}>Total</TableCell>
                     <TableCell className="text-right" colSpan={2}>
-                      Ksh.
-                      {data?.order?.subtotal.toFixed(2)}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "Ksh",
+                      }).format(data?.order?.subtotal || 0)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={5}>Tax</TableCell>
                     <TableCell className="text-right" colSpan={2}>
-                      Ksh.
-                      {data?.order?.tax.toFixed(2)}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "Ksh",
+                      }).format(data?.order?.tax || 0)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={5}>Discout</TableCell>
                     <TableCell className="text-right" colSpan={2}>
-                      Ksh.
-                      {data?.order?.discount.toFixed(2)}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "Ksh",
+                      }).format(data?.order?.discount || 0)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={5}>Grand Total</TableCell>
                     <TableCell className="text-right" colSpan={2}>
-                      Ksh.
-                      {data?.order?.total.toFixed(2)}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "Ksh",
+                      }).format(data?.order?.total || 0)}
                     </TableCell>
                   </TableRow>
                 </TableFooter>
@@ -361,7 +386,10 @@ const OrderPage = () => {
                           {format(pay.processedAt, "dd/MM/yyyy HH:mm")}
                         </TableCell>
                         <TableCell className="text-right">
-                          ksh.{pay.amount.toFixed(2)}
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "Ksh",
+                          }).format(pay.amount)}
                         </TableCell>
                       </TableRow>
                     ))
@@ -377,12 +405,15 @@ const OrderPage = () => {
                   <TableRow>
                     <TableCell colSpan={4}>Grand Total</TableCell>
                     <TableCell className="text-right" colSpan={2}>
-                      Ksh.
-                      {data?.order?.payments
-                        ? data.order.payments
-                            .reduce((acc, pay) => acc + pay.amount, 0)
-                            .toFixed(2)
-                        : "0.00"}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "Ksh",
+                      }).format(
+                        data?.order?.payments.reduce(
+                          (acc, pay) => acc + pay.amount,
+                          0
+                        ) || 0
+                      )}
                     </TableCell>
                   </TableRow>
                 </TableFooter>

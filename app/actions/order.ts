@@ -110,7 +110,9 @@ export const getOrderById = async (id: string) => {
           },
         },
         createdByUser: { select: { id: true, name: true } },
-        payments: true,
+        payments: {
+          orderBy: { createdAt: "desc" },
+        },
       },
     });
 

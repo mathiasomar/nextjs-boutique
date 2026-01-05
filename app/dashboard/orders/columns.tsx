@@ -124,24 +124,36 @@ export const columns: ColumnDef<Order>[] = [
     accessorKey: "total",
     header: "Total Amount",
     cell: ({ row }) => {
-      const order = row.original;
-      return <>Ksh.{order.total.toFixed(2)}</>;
+      const total = parseFloat(row.getValue("total"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "Ksh",
+      }).format(total);
+      return <div className="text-right font-medium">{formatted}</div>;
     },
   },
   {
     accessorKey: "paid",
     header: "Paid Amount",
     cell: ({ row }) => {
-      const order = row.original;
-      return <>Ksh.{order.paid.toFixed(2)}</>;
+      const paid = parseFloat(row.getValue("paid"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "Ksh",
+      }).format(paid);
+      return <div className="text-right font-medium">{formatted}</div>;
     },
   },
   {
     accessorKey: "balance",
     header: "Balance",
     cell: ({ row }) => {
-      const order = row.original;
-      return <>Ksh.{order.balance.toFixed(2)}</>;
+      const balance = parseFloat(row.getValue("balance"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "Ksh",
+      }).format(balance);
+      return <div className="text-right font-medium">{formatted}</div>;
     },
   },
   {

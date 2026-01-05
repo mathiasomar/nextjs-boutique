@@ -9,53 +9,91 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "./ui/chart";
+import { cn } from "@/lib/utils";
 
-const chartConfig = {
-  total: {
-    label: "Total",
-    color: "var(--chart-1)",
-  },
-  successful: {
-    label: "Successful",
-    color: "var(--chart-4)",
-  },
-} satisfies ChartConfig;
+// const chartConfig = {
+//   total: {
+//     label: "Total",
+//     color: "var(--chart-1)",
+//   },
+//   successful: {
+//     label: "Successful",
+//     color: "var(--chart-4)",
+//   },
+// } satisfies ChartConfig;
 
-const chartData = [
-  { month: "January", total: 186, successful: 80 },
-  { month: "February", total: 305, successful: 200 },
-  { month: "March", total: 237, successful: 120 },
-  { month: "April", total: 173, successful: 100 },
-  { month: "May", total: 209, successful: 130 },
-  { month: "June", total: 214, successful: 140 },
-];
+// const chartData = [
+//   { month: "January", total: 186, successful: 80 },
+//   { month: "February", total: 305, successful: 200 },
+//   { month: "March", total: 237, successful: 120 },
+//   { month: "April", total: 173, successful: 100 },
+//   { month: "May", total: 209, successful: 130 },
+//   { month: "June", total: 214, successful: 140 },
+// ];
 
-const AppBarChart = () => {
+export interface AppBarChartProps {
+  cofigs: ChartConfig;
+  data: unknown[];
+  xAxisKey: string;
+  dataKeys: {
+    key: string;
+    name: string;
+    color: string;
+  }[];
+  height?: number;
+  showGrid?: boolean;
+  stacked?: boolean;
+  layout?: "horizontal" | "vertical";
+  barSize?: number;
+}
+
+const AppBarChart = ({
+  data,
+  cofigs,
+  xAxisKey,
+  dataKeys,
+  height = 300,
+  stacked = false,
+  layout = "vertical",
+  barSize = 30,
+}: AppBarChartProps) => {
   return (
-    <div className="">
-      <h1 className="text-lg font-medium mb-6">Total Revenue</h1>
-      <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-        <BarChart accessibilityLayer data={chartData}>
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            tickMargin={10}
-            axisLine={false}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <YAxis tickLine={false} tickMargin={10} axisLine={false} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Bar dataKey={"total"} fill="var(--color-total)" radius={4} />
+    <ChartContainer
+      config={cofigs}
+      className={cn("min-h-[200px] w-full", height && `h-[${height}px]`)}
+    >
+      <BarChart accessibilityLayer data={data}>
+        <CartesianGrid vertical={false} />
+        <XAxis
+          type={layout === "vertical" ? "category" : "number"}
+          dataKey={layout === "vertical" ? xAxisKey : undefined}
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+          tickFormatter={(value) => value.slice(0, 3)}
+        />
+        <YAxis
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+          type={layout === "vertical" ? "number" : "category"}
+          dataKey={layout === "vertical" ? undefined : xAxisKey}
+        />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartLegend content={<ChartLegendContent />} />
+        {dataKeys.map((dataKey) => (
           <Bar
-            dataKey={"successful"}
-            fill="var(--color-successful)"
-            radius={4}
+            key={dataKey.key}
+            dataKey={dataKey.key}
+            name={dataKey.name}
+            fill={dataKey.color}
+            stackId={stacked ? "stack" : undefined}
+            radius={[4, 4, 0, 0]}
+            barSize={barSize}
           />
-        </BarChart>
-      </ChartContainer>
-    </div>
+        ))}
+      </BarChart>
+    </ChartContainer>
   );
 };
 

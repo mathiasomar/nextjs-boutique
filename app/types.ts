@@ -189,3 +189,18 @@ export interface MonthlyRevenueData {
   orders: number;
   growth: number | null;
 }
+
+export interface ProductPerformance {
+  id?: string;
+  name: string;
+  category?: string | { id: string; name: string };
+  revenue: number;
+  unitsSold?: number;
+  growth: number;
+}
+
+export interface OrderStatusSummary {
+  status: string;
+  count: number;
+  percentage: number;
+}

@@ -8,6 +8,7 @@ import {
   getOrderById,
   getOrderMetrics,
   getOrders,
+  getProductPerformance,
   getTopProducts,
   updateOrderStatus,
 } from "@/app/actions/order";
@@ -249,6 +250,21 @@ export const useOrderMetrics = () => {
       const result = await getOrderMetrics();
       if (!result) {
         throw new Error("Order metrics not found");
+      }
+
+      return result;
+    },
+    keepPreviousData: true,
+  });
+};
+
+export const useProductPerformance = () => {
+  return useQuery({
+    queryKey: ["product-performance"],
+    queryFn: async () => {
+      const result = await getProductPerformance();
+      if (!result) {
+        throw new Error("Product performance not found");
       }
 
       return result;

@@ -9,7 +9,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Cell,
 } from "recharts";
 
 interface BarChartProps {
@@ -37,8 +36,6 @@ export function BarChart({
   layout = "vertical",
   barSize = 30,
 }: BarChartProps) {
-  const Chart = layout === "vertical" ? RechartsBarChart : RechartsBarChart;
-
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBarChart

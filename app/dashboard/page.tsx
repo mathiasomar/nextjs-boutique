@@ -1,10 +1,11 @@
-import AppBarChart from "@/components/app-bar-chart";
-import AppPieChart from "@/components/app-pie-chart";
 import CardList from "@/components/card-list";
-import DailySalesChart from "@/components/charts/daily-sales-chart";
+import { OrderStatusChart } from "@/components/dashboard/order-status";
 import TodoList from "@/components/todo-list";
 import prisma from "@/lib/prisma";
 import React from "react";
+import { getOrderStatusSummary } from "../actions/order";
+import { ProductPerformanceChart } from "@/components/dashboard/product-performance";
+import { RevenueChart } from "@/components/dashboard/revenue-chart";
 
 const HomePage = async () => {
   // Fetch dashboard data
@@ -24,6 +25,8 @@ const HomePage = async () => {
       take: 10,
     }),
   ]);
+
+  const orderStatus = await getOrderStatusSummary();
 
   // const today = new Date();
   // const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -59,19 +62,19 @@ const HomePage = async () => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
         <div className="bg-primary-foreground p-4 rounded-lg lg:col-span-2 xl:col-span-1 2xl:col-span-2">
-          <AppBarChart />
+          <ProductPerformanceChart />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg">
           <CardList title="Latest Orders" />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg">
-          <AppPieChart />
+          <OrderStatusChart data={orderStatus} />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg">
           <TodoList />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg lg:col-span-2 xl:col-span-1 2xl:col-span-2">
-          <DailySalesChart />
+          <RevenueChart />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg">
           <CardList title="Recent Products" />

@@ -25,7 +25,7 @@ export function PieChart({
   nameKey,
   colors,
   height = 300,
-  innerRadius = 60,
+  innerRadius = 50,
   outerRadius = 80,
 }: PieChartProps) {
   return (

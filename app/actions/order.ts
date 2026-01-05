@@ -13,6 +13,8 @@ import {
   MonthlyRevenueData,
   OrderFilters,
   OrderItemInput,
+  OrderStatusSummary,
+  ProductPerformance,
   ProductSalesData,
 } from "../types";
 import { Prisma } from "@/generated/prisma/client";
@@ -794,3 +796,134 @@ export const getOrderMetrics = async () => {
     throw new Error("Failed to fetch order metrics");
   }
 };
+
+export async function getProductPerformance(): Promise<ProductPerformance[]> {
+  const startOfMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    1
+  );
+  const startOfLastMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() - 1,
+    1
+  );
+  const endOfLastMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    0
+  );
+
+  try {
+    const [currentMonthProducts, lastMonthProducts] = await Promise.all([
+      // This month's product performance
+      prisma.orderItem.groupBy({
+        by: ["productId"],
+        where: {
+          order: {
+            createdAt: { gte: startOfMonth },
+            status: { notIn: ["CANCELLED", "RETURNED"] },
+          },
+        },
+        _sum: {
+          quantity: true,
+          totalPrice: true,
+        },
+        orderBy: {
+          _sum: {
+            totalPrice: "desc",
+          },
+        },
+        take: 10,
+      }),
+
+      // Last month's product performance
+      prisma.orderItem.groupBy({
+        by: ["productId"],
+        where: {
+          order: {
+            createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
+            status: { notIn: ["CANCELLED", "RETURNED"] },
+          },
+        },
+        _sum: {
+          totalPrice: true,
+        },
+      }),
+    ]);
+
+    // Get product details
+    const productIds = currentMonthProducts.map((item) => item.productId);
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+      },
+      select: {
+        id: true,
+        name: true,
+        category: true,
+      },
+    });
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+    const lastMonthMap = new Map(
+      lastMonthProducts.map((item) => [
+        item.productId,
+        Number(item._sum.totalPrice || 0),
+      ])
+    );
+
+    return currentMonthProducts.map((item) => {
+      const product = productMap.get(item.productId);
+      const currentRevenue = Number(item._sum.totalPrice || 0);
+      const lastRevenue = lastMonthMap.get(item.productId) || 0;
+      const growth =
+        lastRevenue > 0
+          ? ((currentRevenue - lastRevenue) / lastRevenue) * 100
+          : 100;
+
+      return {
+        id: item.productId,
+        name: product?.name || "Unknown Product",
+        category:
+          product?.category && typeof product.category === "object"
+            ? product.category.name
+            : "Unknown Category",
+        revenue: currentRevenue,
+        unitsSold: item._sum.quantity || 0,
+        growth: parseFloat(growth.toFixed(1)),
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching product performance:", error);
+    return [];
+  }
+}
+
+export async function getOrderStatusSummary(): Promise<OrderStatusSummary[]> {
+  try {
+    const statusCounts = await prisma.order.groupBy({
+      by: ["status"],
+      _count: {
+        id: true,
+      },
+    });
+
+    const totalOrders = statusCounts.reduce(
+      (sum, item) => sum + item._count.id,
+      0
+    );
+
+    return statusCounts.map((item) => ({
+      status: item.status,
+      count: item._count.id,
+      percentage:
+        totalOrders > 0
+          ? parseFloat(((item._count.id / totalOrders) * 100).toFixed(1))
+          : 0,
+    }));
+  } catch (error) {
+    console.error("Error fetching order status summary:", error);
+    return [];
+  }
+}

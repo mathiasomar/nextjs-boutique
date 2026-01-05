@@ -72,16 +72,16 @@ export const columns: ColumnDef<Order>[] = [
       return (
         <span
           className={cn(
-            "py-1 px-2 rounded-full text-white text-sm",
+            "p-1 rounded-md w-max text-xs",
             order.status === "DRAFT"
-              ? "bg-green-300"
+              ? "bg-green-500/40"
               : order.status === "PENDING"
-              ? "bg-gray-500"
+              ? "bg-yellow-500/40"
               : order.status === "PROCESSING" || order.status === "SHIPPED"
-              ? "bg-orange-400"
+              ? "bg-orange-500/70"
               : order.status === "DELIVERED" || order.status === "CONFIRMED"
-              ? "bg-green-500"
-              : "bg-red-500"
+              ? "bg-green-500/70"
+              : "bg-red-500/40"
           )}
         >
           {order.status
@@ -101,14 +101,14 @@ export const columns: ColumnDef<Order>[] = [
       return (
         <span
           className={cn(
-            "py-1 px-2 rounded-full text-white text-sm",
+            "p-1 rounded-md w-max text-xs",
             order.paymentStatus === "PENDING"
-              ? "bg-gray-500"
+              ? "bg-yellow-500/40"
               : order.paymentStatus === "PARTIAL"
-              ? "bg-orange-400"
+              ? "bg-orange-500/70"
               : order.paymentStatus === "COMPLETED"
-              ? "bg-green-500"
-              : "bg-red-500"
+              ? "bg-green-500/70"
+              : "bg-red-500/40"
           )}
         >
           {order.paymentStatus

@@ -103,18 +103,18 @@ const OrderPage = () => {
                   <span className="font-bold">Order Status:</span>
                   <span
                     className={cn(
-                      "py-1 px-2 rounded-full text-white text-sm",
+                      "p-1 rounded-md w-max text-xs",
                       data?.order?.status === "DRAFT"
-                        ? "bg-green-300"
+                        ? "bg-green-500/40"
                         : data?.order?.status === "PENDING"
-                        ? "bg-gray-500"
+                        ? "bg-yellow-500/40"
                         : data?.order?.status === "PROCESSING" ||
                           data?.order?.status === "SHIPPED"
-                        ? "bg-orange-400"
+                        ? "bg-orange-500/70"
                         : data?.order?.status === "DELIVERED" ||
                           data?.order?.status === "CONFIRMED"
-                        ? "bg-green-500"
-                        : "bg-red-500"
+                        ? "bg-green-500/70"
+                        : "bg-red-500/40"
                     )}
                   >
                     {
@@ -132,14 +132,14 @@ const OrderPage = () => {
                   <span className="font-bold">Payment Status:</span>
                   <span
                     className={cn(
-                      "py-1 px-2 rounded-full text-white text-sm",
+                      "p-1 rounded-md w-max text-xs",
                       data?.order?.paymentStatus === "PENDING"
-                        ? "bg-gray-500"
+                        ? "bg-yellow-500/40"
                         : data?.order?.paymentStatus === "PARTIAL"
-                        ? "bg-orange-400"
+                        ? "bg-orange-500/70"
                         : data?.order?.paymentStatus === "COMPLETED"
-                        ? "bg-green-500"
-                        : "bg-red-500"
+                        ? "bg-green-500/70"
+                        : "bg-red-500/40"
                     )}
                   >
                     {

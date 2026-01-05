@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { Expense } from "@/generated/prisma/client";
-import { format } from "date-fns";
 import EditExpense from "@/components/edit-expense";
 
 export const columns: ColumnDef<Expense>[] = [

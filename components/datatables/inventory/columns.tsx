@@ -5,7 +5,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 
 import { InventoryLog } from "@/generated/prisma/client";
-import { format } from "date-fns";
 
 export const columns: ColumnDef<InventoryLog>[] = [
   // {

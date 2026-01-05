@@ -10,7 +10,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { format, formatDistance, subDays } from "date-fns";
 import ProductImages from "./product-images";
 import EditInventory from "@/components/edit-inventory";
 import EditProduct from "@/components/edit-product";
@@ -21,6 +20,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { DataGridSkeleton } from "@/components/loaders/data-grid-skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { formatDistance, subDays } from "date-fns";
 
 const tableColumn = [
   { header: "Type", accessorKey: "type" as const, className: "w-[100px]" },

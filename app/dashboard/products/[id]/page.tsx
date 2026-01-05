@@ -21,7 +21,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { DataGridSkeleton } from "@/components/loaders/data-grid-skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { Decimal } from "@prisma/client/runtime/client";
 
 const tableColumn = [
   { header: "Type", accessorKey: "type" as const, className: "w-[100px]" },

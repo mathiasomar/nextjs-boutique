@@ -5,6 +5,7 @@ import { Decimal } from "@prisma/client/runtime/client";
 import { useQuery } from "@tanstack/react-query";
 
 export const usePayments = (filters?: {
+  search?: string;
   startDate?: string;
   endDate?: string;
   paymentStatus?: PaymentStatus;

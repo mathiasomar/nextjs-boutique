@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 
 export interface FilterPayment {
+  search?: string;
   startDate?: string;
   endDate?: string;
   paymentStatus?: PaymentStatus;
@@ -19,9 +20,13 @@ export async function getPayments(filters: FilterPayment = {}) {
   });
   if (!session?.user) throw new Error("Unauthorized");
 
-  const { startDate, endDate, paymentStatus, paymentMethod } = filters;
+  const { search, startDate, endDate, paymentStatus, paymentMethod } = filters;
 
   const where: Prisma.PaymentWhereInput = {};
+
+  if (search) {
+    where.OR = [{ transactionId: { contains: search, mode: "insensitive" } }];
+  }
 
   if (startDate && endDate) {
     where.processedAt = {
@@ -53,6 +58,13 @@ export async function getPayments(filters: FilterPayment = {}) {
   try {
     const payments = await prisma.payment.findMany({
       where,
+      include: {
+        order: {
+          select: {
+            orderNumber: true,
+          },
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },

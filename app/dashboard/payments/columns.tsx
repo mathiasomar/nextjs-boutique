@@ -6,8 +6,6 @@ import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import { Checkbox } from "@/components/ui/checkbox";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,49 +16,41 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import Link from "next/link";
-
-export type Payment = {
-  id: string;
-  amount: number;
-  fullName: string;
-  email: string;
-  userId: string;
-  status: "pending" | "processing" | "success" | "failed";
-};
+import { Payment } from "@/generated/prisma/client";
 
 export const columns: ColumnDef<Payment>[] = [
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <Checkbox
+  //       checked={
+  //         table.getIsAllPageRowsSelected() ||
+  //         (table.getIsSomePageRowsSelected() && "indeterminate")
+  //       }
+  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //       aria-label="Select all"
+  //     />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <Checkbox
+  //       checked={row.getIsSelected()}
+  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+  //       aria-label="Select row"
+  //     />
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
+    accessorKey: "transactionId",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Transaction ID" />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
   },
   {
-    accessorKey: "fullName",
+    accessorKey: "order.orderNumber",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Full Name" />
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
+      <DataTableColumnHeader column={column} title="Order Number" />
     ),
   },
   {
@@ -70,16 +60,44 @@ export const columns: ColumnDef<Payment>[] = [
       const status = row.getValue("status");
 
       return (
-        <div
+        <span
           className={cn(
-            `p-1 rounded-md w-max text-xs`,
-            status === "pending" && "bg-yellow-500/40",
-            status === "success" && "bg-green-500/40",
-            status === "failed" && "bg-red-500/40"
+            "p-1 rounded-md w-max text-xs",
+            status === "PENDING"
+              ? "bg-yellow-500/40"
+              : status === "COMPLETED"
+              ? "bg-green-500/70"
+              : "bg-red-500/40"
           )}
         >
-          {status as string}
-        </div>
+          {String(status)
+            .toLowerCase()
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "method",
+    header: "Payment Method",
+    cell: ({ row }) => {
+      const method = row.getValue("method");
+
+      return (
+        <span
+          className={cn(
+            "p-1 rounded-md w-max text-xs",
+            method === "CASH" ? "bg-yellow-500/40" : "bg-green-500/70"
+          )}
+        >
+          {String(method)
+            .toLowerCase()
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")}
+        </span>
       );
     },
   },
@@ -92,6 +110,19 @@ export const columns: ColumnDef<Payment>[] = [
         style: "currency",
         currency: "Ksh",
       }).format(amount);
+
+      return <div className="text-right font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "processedAt",
+    header: () => <div className="text-right">Processed At</div>,
+    cell: ({ row }) => {
+      const processedAt = new Date(row.getValue("processedAt"));
+      const formatted = new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(processedAt);
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
@@ -118,7 +149,7 @@ export const columns: ColumnDef<Payment>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href={`/users/${payment.userId}`}>View customer</Link>
+              <Link href={`/users/${payment.id}`}>View customer</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>View payment details</DropdownMenuItem>
           </DropdownMenuContent>

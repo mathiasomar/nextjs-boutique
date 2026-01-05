@@ -21,7 +21,7 @@ import { useState } from "react";
 import AppAreaChart from "../app-area-chart";
 
 export function RevenueChart() {
-  const [period, setPeriod] = useState("30");
+  const [period, setPeriod] = useState("7");
   const { data, isLoading } = useDailySales(Number(period));
   return (
     <Card className="w-full">
@@ -75,8 +75,16 @@ export function RevenueChart() {
             xAxisKey="date"
             height={350}
             dataKeys={[
-              { key: "revenue", name: "Revenue", color: "#3b82f6" },
-              { key: "average", name: "Average Order", color: "#10b981" },
+              {
+                key: "revenue",
+                name: "Revenue",
+                color: "var(--color-revenue)",
+              },
+              {
+                key: "average",
+                name: "Average Order",
+                color: "var(--color-average)",
+              },
             ]}
           />
         )}

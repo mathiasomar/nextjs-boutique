@@ -198,7 +198,7 @@ export const useMakePayment = () => {
   });
 };
 
-export const useDailySales = (days: number = 30, productId?: string) => {
+export const useDailySales = (days: number = 7, productId?: string) => {
   return useQuery({
     queryKey: ["daily-sales", { days, productId }],
     queryFn: async () => {

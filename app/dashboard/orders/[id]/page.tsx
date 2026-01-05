@@ -54,7 +54,7 @@ const OrderPage = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/dasboard">Dashboard</BreadcrumbLink>
+            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -407,15 +407,17 @@ const OrderPage = () => {
                   <TableRow>
                     <TableCell colSpan={4}>Grand Total</TableCell>
                     <TableCell className="text-right" colSpan={2}>
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "Ksh",
-                      }).format(
-                        data?.order?.payments.reduce(
-                          (acc, pay) => acc + pay.amount,
-                          0
-                        ) || 0
-                      )}
+                      {data?.order?.payments
+                        ? new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "Ksh",
+                          }).format(
+                            data?.order?.payments.reduce(
+                              (acc, pay) => acc + pay.amount,
+                              0
+                            ) || 0
+                          )
+                        : 0}
                     </TableCell>
                   </TableRow>
                 </TableFooter>

@@ -505,7 +505,7 @@ export const createPayment = async (
 };
 
 export const getDailySales = async (
-  days: number = 30,
+  days: number = 7,
   productId?: string
 ): Promise<DailySalesData[]> => {
   const startDate = subDays(new Date(), days - 1);

@@ -47,6 +47,8 @@ export const useOrders = (filters?: {
   search?: string;
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
+  startDate?: string;
+  endDate?: string;
 }) => {
   return useQuery({
     queryKey: ["orders", filters],

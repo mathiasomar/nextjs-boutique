@@ -14,7 +14,10 @@ const OrderDataTable = () => {
   const filterParams = {
     search: searchParams.get("search") || undefined,
     status: (searchParams.get("status") as OrderStatus) || undefined,
-    payStatus: (searchParams.get("payStatus") as PaymentStatus) || undefined,
+    paymentStatus:
+      (searchParams.get("paymentStatus") as PaymentStatus) || undefined,
+    startDate: searchParams.get("startDate") || undefined,
+    endDate: searchParams.get("endDate") || undefined,
   };
 
   const { data, isLoading, error } = useOrders(filterParams);

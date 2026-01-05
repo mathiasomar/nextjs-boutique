@@ -11,6 +11,8 @@ import OrderDataTable from "@/components/datatables/order-data-table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import FilterByDate from "@/components/filter-by-date";
+import OrderFilters from "@/components/order-filters";
 
 const OrdersPage = async () => {
   return (
@@ -41,8 +43,11 @@ const OrdersPage = async () => {
         <Search />
         <div className="flex items-center gap-4">
           {/* Filters */}
-          {/* <FilterCustomer /> */}
+          <FilterByDate />
         </div>
+      </div>
+      <div className="flex items-center justify-end">
+        <OrderFilters />
       </div>
       <OrderDataTable />
     </div>

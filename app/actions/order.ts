@@ -17,7 +17,7 @@ export const getOrders = async (filters: OrderFilters) => {
   });
   if (!session?.user) throw new Error("Unauthorized");
 
-  const { search, paymentStatus, status } = filters;
+  const { search, paymentStatus, status, startDate, endDate } = filters;
 
   const where: Prisma.OrderWhereInput = {};
 
@@ -35,6 +35,25 @@ export const getOrders = async (filters: OrderFilters) => {
 
   if (status !== undefined) {
     where.status = status;
+  }
+
+  if (startDate && endDate) {
+    where.createdAt = {
+      gte: new Date(startDate),
+      lte: new Date(endDate),
+    };
+  }
+
+  if (startDate && !endDate) {
+    where.createdAt = {
+      gte: new Date(startDate),
+    };
+  }
+
+  if (!startDate && endDate) {
+    where.createdAt = {
+      lte: new Date(endDate),
+    };
   }
 
   try {

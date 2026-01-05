@@ -128,6 +128,8 @@ export interface OrderFilters {
   search?: string;
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
+  startDate?: string;
+  endDate?: string;
 }
 
 export type ProductWithoutCategory = {

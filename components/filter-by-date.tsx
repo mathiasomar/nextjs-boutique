@@ -105,7 +105,7 @@ const FilterByDate = () => {
         </Popover>
       </div>
       <Button variant="outline" onClick={handleClearFilter}>
-        Clear Filter
+        Clear
       </Button>
     </div>
   );

@@ -62,18 +62,28 @@ export const columns: ColumnDef<Expense>[] = [
       <DataTableColumnHeader column={column} title="Created On" />
     ),
     cell: ({ row }) => {
-      const expense = row.original;
-      return <>{format(expense.createdAt, "dd/MM/yyyy HH:mm")}</>;
+      const createdAt = new Date(row.getValue("createdAt"));
+      const formatted = new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(createdAt);
+
+      return <div>{formatted}</div>;
     },
   },
   {
     accessorKey: "updatedAt",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created On" />
+      <DataTableColumnHeader column={column} title="Updated On" />
     ),
     cell: ({ row }) => {
-      const expense = row.original;
-      return <>{format(expense.updatedAt, "dd/MM/yyyy HH:mm")}</>;
+      const updatedAt = new Date(row.getValue("updatedAt"));
+      const formatted = new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(updatedAt);
+
+      return <div>{formatted}</div>;
     },
   },
   {

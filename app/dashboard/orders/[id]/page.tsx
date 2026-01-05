@@ -211,17 +211,19 @@ const OrderPage = () => {
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Created At:</span>
                   <span>
-                    {formatISO(data?.order?.orderDate ?? new Date(), {
-                      representation: "date",
-                    })}
+                    {new Intl.DateTimeFormat("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(data?.order?.orderDate)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Update At:</span>
                   <span>
-                    {formatISO(data?.order?.updatedAt ?? new Date(), {
-                      representation: "date",
-                    })}
+                    {new Intl.DateTimeFormat("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(data?.order?.updatedAt)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import Link from "next/link";
-import { format } from "date-fns";
 import PaymentForm from "@/components/payment-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Order } from "@/generated/prisma/client";
@@ -162,8 +161,13 @@ export const columns: ColumnDef<Order>[] = [
       <DataTableColumnHeader column={column} title="Order Date" />
     ),
     cell: ({ row }) => {
-      const order = row.original;
-      return <>{format(order.orderDate, "dd/MM/yyyy HH:mm")}</>;
+      const orderDate = new Date(row.getValue("orderDate"));
+      const formatted = new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(orderDate);
+
+      return <div className="text-right font-medium">{formatted}</div>;
     },
   },
   {

@@ -48,8 +48,13 @@ export const columns: ColumnDef<ActivityLog>[] = [
     accessorKey: "createdAt",
     header: "Date",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return <div>{format(date, "dd/MM/yyyy HH:mm")}</div>;
+      const createdAt = new Date(row.getValue("createdAt"));
+      const formatted = new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(createdAt);
+
+      return <div>{formatted}</div>;
     },
   },
   // {

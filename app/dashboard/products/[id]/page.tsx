@@ -221,7 +221,10 @@ const ProductPage = () => {
                   data={data!.product.inventoryLogs!.map((log) => ({
                     ...log,
                     user: log.user?.name || "Unknown User",
-                    createdAt: format(log.createdAt, "dd MMM yyyy") as string,
+                    createdAt: new Intl.DateTimeFormat("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(log.createdAt),
                   }))}
                   maxHeight="400px"
                   description="A list of your recent inventory logs."

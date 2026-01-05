@@ -3,8 +3,12 @@
 import {
   createOrder,
   createPayment,
+  getDailySales,
+  getMonthlyRevenue,
   getOrderById,
+  getOrderMetrics,
   getOrders,
+  getTopProducts,
   updateOrderStatus,
 } from "@/app/actions/order";
 import { CreateOrderInput, OrderFilters } from "@/app/types";
@@ -190,5 +194,65 @@ export const useMakePayment = () => {
     onError: (error: Error) => {
       console.error(`Payment failed: ${error.message}`);
     },
+  });
+};
+
+export const useDailySales = (days: number = 30, productId?: string) => {
+  return useQuery({
+    queryKey: ["daily-sales", { days, productId }],
+    queryFn: async () => {
+      const result = await getDailySales(days, productId);
+      if (!result) {
+        throw new Error("Daily sales not found");
+      }
+
+      return result;
+    },
+    keepPreviousData: true,
+  });
+};
+
+export const useTopProducts = (limit: number = 10, days: number = 30) => {
+  return useQuery({
+    queryKey: ["top-products", { limit, days }],
+    queryFn: async () => {
+      const result = await getTopProducts(limit, days);
+      if (!result) {
+        throw new Error("Top products not found");
+      }
+
+      return result;
+    },
+    keepPreviousData: true,
+  });
+};
+
+export const useMontlyRevenue = (months: number = 12) => {
+  return useQuery({
+    queryKey: ["monthly-revenue", { months }],
+    queryFn: async () => {
+      const result = await getMonthlyRevenue(months);
+      if (!result) {
+        throw new Error("Monthly revenue not found");
+      }
+
+      return result;
+    },
+    keepPreviousData: true,
+  });
+};
+
+export const useOrderMetrics = () => {
+  return useQuery({
+    queryKey: ["order-metrics"],
+    queryFn: async () => {
+      const result = await getOrderMetrics();
+      if (!result) {
+        throw new Error("Order metrics not found");
+      }
+
+      return result;
+    },
+    keepPreviousData: true,
   });
 };

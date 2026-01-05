@@ -160,3 +160,32 @@ export type CartStoreActionsType = {
   removeFromCart: (product: CartItemType) => void;
   clearCart: () => void;
 };
+
+// Types for chart data
+export interface DailySalesData {
+  date: string;
+  total: number;
+  orders: number;
+  average: number;
+}
+
+export interface ProductSalesData {
+  productId: string;
+  productName: string;
+  category: string;
+  quantity: number;
+  revenue: number;
+}
+
+export interface OrderStatusData {
+  status: string;
+  count: number;
+  percentage: number;
+}
+
+export interface MonthlyRevenueData {
+  month: string;
+  revenue: number;
+  orders: number;
+  growth: number | null;
+}

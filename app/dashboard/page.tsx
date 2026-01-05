@@ -1,7 +1,7 @@
-import AppAreaChart from "@/components/app-area-chart";
 import AppBarChart from "@/components/app-bar-chart";
 import AppPieChart from "@/components/app-pie-chart";
 import CardList from "@/components/card-list";
+import DailySalesChart from "@/components/charts/daily-sales-chart";
 import TodoList from "@/components/todo-list";
 import prisma from "@/lib/prisma";
 import React from "react";
@@ -71,7 +71,7 @@ const HomePage = async () => {
           <TodoList />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg lg:col-span-2 xl:col-span-1 2xl:col-span-2">
-          <AppAreaChart />
+          <DailySalesChart />
         </div>
         <div className="bg-primary-foreground p-4 rounded-lg">
           <CardList title="Recent Products" />

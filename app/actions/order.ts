@@ -7,9 +7,17 @@ import { headers } from "next/headers";
 import { updateStock } from "./product";
 // import { revalidatePath } from "next/cache";
 import { OrderStatus, PaymentMethod } from "@/generated/prisma/enums";
-import { CreateOrderInput, OrderFilters, OrderItemInput } from "../types";
+import {
+  CreateOrderInput,
+  DailySalesData,
+  MonthlyRevenueData,
+  OrderFilters,
+  OrderItemInput,
+  ProductSalesData,
+} from "../types";
 import { Prisma } from "@/generated/prisma/client";
 import { revalidatePath } from "next/cache";
+import { startOfDay, endOfDay, subDays, format, parseISO } from "date-fns";
 
 export const getOrders = async (filters: OrderFilters) => {
   const session = await auth.api.getSession({
@@ -491,5 +499,298 @@ export const createPayment = async (
   } catch (error) {
     console.error("Create payment error:", error);
     return { error: "Failed to create payment" };
+  }
+};
+
+export const getDailySales = async (
+  days: number = 30,
+  productId?: string
+): Promise<DailySalesData[]> => {
+  const startDate = subDays(new Date(), days - 1);
+  const endDate = new Date();
+
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        createdAt: {
+          gte: startOfDay(startDate),
+          lte: endOfDay(endDate),
+        },
+        status: {
+          not: "CANCELLED",
+        },
+        ...(productId && {
+          items: {
+            some: {
+              productId,
+            },
+          },
+        }),
+      },
+      include: {
+        items: productId
+          ? {
+              where: { productId },
+            }
+          : true,
+      },
+    });
+
+    // Group by date
+    const salesByDate = orders.reduce((acc, order) => {
+      const dateKey = format(order.createdAt, "yyyy-MM-dd");
+
+      if (!acc[dateKey]) {
+        acc[dateKey] = {
+          total: 0,
+          orders: 0,
+          items: 0,
+        };
+      }
+
+      acc[dateKey].total += Number(order.total);
+      acc[dateKey].orders += 1;
+
+      // If filtering by product, only count items for that product
+      if (productId) {
+        const productItems = order.items.filter(
+          (item) => item.productId === productId
+        );
+        acc[dateKey].items += productItems.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+      } else {
+        acc[dateKey].items += order.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+      }
+
+      return acc;
+    }, {} as Record<string, { total: number; orders: number; items: number }>);
+
+    // Fill missing dates and format for chart
+    const result: DailySalesData[] = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const dateKey = format(currentDate, "yyyy-MM-dd");
+      const dayData = salesByDate[dateKey] || { total: 0, orders: 0, items: 0 };
+
+      result.push({
+        date: format(currentDate, "MMM dd"),
+        total: parseFloat(dayData.total.toFixed(2)),
+        orders: dayData.orders,
+        average:
+          dayData.orders > 0
+            ? parseFloat((dayData.total / dayData.orders).toFixed(2))
+            : 0,
+      });
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching daily sales:", error);
+    throw new Error("Failed to fetch sales data");
+  }
+};
+
+export const getTopProducts = async (
+  limit: number = 10,
+  days: number = 30
+): Promise<ProductSalesData[]> => {
+  const startDate = subDays(new Date(), days);
+
+  try {
+    const topProducts = await prisma.orderItem.groupBy({
+      by: ["productId"],
+      where: {
+        order: {
+          createdAt: { gte: startDate },
+          status: { not: "CANCELLED" },
+        },
+      },
+      _sum: {
+        quantity: true,
+        totalPrice: true,
+      },
+      orderBy: {
+        _sum: {
+          totalPrice: "desc",
+        },
+      },
+      take: limit,
+    });
+
+    // Get product details
+    const productIds = topProducts.map((item) => item.productId);
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+      },
+      select: {
+        id: true,
+        name: true,
+        category: true,
+      },
+    });
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    return topProducts.map((item) => ({
+      productId: item.productId,
+      productName: productMap.get(item.productId)?.name || "Unknown Product",
+      category:
+        (productMap.get(item.productId)?.category as { name: string })?.name ||
+        "Unknown",
+      quantity: item._sum.quantity || 0,
+      revenue: parseFloat((item._sum.totalPrice || 0).toFixed(2)),
+    }));
+  } catch (error) {
+    console.error("Error fetching top products:", error);
+    throw new Error("Failed to fetch product data");
+  }
+};
+
+export const getMonthlyRevenue = async (
+  months: number = 12
+): Promise<MonthlyRevenueData[]> => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setMonth(startDate.getMonth() - months + 1);
+  startDate.setDate(1);
+
+  try {
+    const monthlyData = await prisma.$queryRaw<
+      Array<{
+        month: string;
+        revenue: number;
+        orders: number;
+      }>
+    >`
+      SELECT 
+        DATE_FORMAT(createdAt, '%Y-%m') as month,
+        SUM(grandTotal) as revenue,
+        COUNT(*) as orders
+      FROM Order
+      WHERE createdAt >= ${startDate}
+        AND createdAt <= ${endDate}
+        AND status != 'CANCELLED'
+      GROUP BY DATE_FORMAT(createdAt, '%Y-%m')
+      ORDER BY month ASC
+    `;
+
+    // Format for chart with growth calculation
+    return monthlyData.map((data, index) => {
+      const previousMonth = monthlyData[index - 1];
+      const growth = previousMonth
+        ? parseFloat(
+            (
+              ((data.revenue - previousMonth.revenue) / previousMonth.revenue) *
+              100
+            ).toFixed(1)
+          )
+        : null;
+
+      return {
+        month: format(parseISO(`${data.month}-01`), "MMM yy"),
+        revenue: parseFloat(data.revenue.toFixed(2)),
+        orders: data.orders,
+        growth,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching monthly revenue:", error);
+    throw new Error("Failed to fetch monthly revenue data");
+  }
+};
+
+export const getOrderMetrics = async () => {
+  try {
+    const today = new Date();
+    const startOfToday = startOfDay(today);
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const [
+      totalOrders,
+      todayOrders,
+      monthlyOrders,
+      totalRevenue,
+      todayRevenue,
+      monthlyRevenue,
+      avgOrderValue,
+      pendingOrders,
+    ] = await Promise.all([
+      // Total orders
+      prisma.order.count(),
+
+      // Today's orders
+      prisma.order.count({
+        where: {
+          createdAt: { gte: startOfToday },
+          status: { not: "CANCELLED" },
+        },
+      }),
+
+      // This month's orders
+      prisma.order.count({
+        where: {
+          createdAt: { gte: startOfMonth },
+          status: { not: "CANCELLED" },
+        },
+      }),
+
+      // Total revenue
+      prisma.order.aggregate({
+        where: { status: { not: "CANCELLED" } },
+        _sum: { total: true },
+      }),
+
+      // Today's revenue
+      prisma.order.aggregate({
+        where: {
+          createdAt: { gte: startOfToday },
+          status: { not: "CANCELLED" },
+        },
+        _sum: { total: true },
+      }),
+
+      // Monthly revenue
+      prisma.order.aggregate({
+        where: {
+          createdAt: { gte: startOfMonth },
+          status: { not: "CANCELLED" },
+        },
+        _sum: { total: true },
+      }),
+
+      // Average order value
+      prisma.order.aggregate({
+        where: { status: { not: "CANCELLED" } },
+        _avg: { total: true },
+      }),
+
+      // Pending orders
+      prisma.order.count({
+        where: { status: "PENDING" },
+      }),
+    ]);
+
+    return {
+      totalOrders,
+      todayOrders,
+      monthlyOrders,
+      totalRevenue: parseFloat((totalRevenue._sum.total || 0).toFixed(2)),
+      todayRevenue: parseFloat((todayRevenue._sum.total || 0).toFixed(2)),
+      monthlyRevenue: parseFloat((monthlyRevenue._sum.total || 0).toFixed(2)),
+      avgOrderValue: parseFloat((avgOrderValue._avg.total || 0).toFixed(2)),
+      pendingOrders,
+    };
+  } catch (error) {
+    console.error("Error fetching order metrics:", error);
+    throw new Error("Failed to fetch order metrics");
   }
 };

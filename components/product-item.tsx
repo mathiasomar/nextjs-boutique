@@ -137,6 +137,8 @@ const ProductItem = ({ product }: { product: Product }) => {
                   <Input
                     type="number"
                     value={quantity}
+                    min={1}
+                    max={product.currentStock}
                     onChange={(e) => setQuantity(Number(e.target.value))}
                   />
                 </span>

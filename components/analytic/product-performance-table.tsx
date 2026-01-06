@@ -65,7 +65,14 @@ const ProductPerformanceTable = ({
                 index === 0 ? "bg-green-50" : ""
               )}
             >
-              <TableCell className="font-medium">{product.name}</TableCell>
+              <TableCell
+                className={cn(
+                  "font-medium",
+                  index === 0 ? "text-gray-700" : ""
+                )}
+              >
+                {product.name}
+              </TableCell>
               <TableCell className="text-gray-500">{product.sku}</TableCell>
               <TableCell>
                 <Badge variant="outline">{product.category}</Badge>

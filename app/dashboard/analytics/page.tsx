@@ -40,10 +40,23 @@ import {
 } from "lucide-react";
 import React from "react";
 
+type ProductPerformance = {
+  id: string;
+  name: string;
+  sku: string;
+  category: string;
+  currentRevenue: number;
+  previousRevenue: number;
+  revenueChange: number;
+  changePercentage: number;
+  currentStock: number;
+  minStockLevel: number;
+};
+
+type TimeFrameType = "7d" | "30d" | "lastMonth" | "allMonths";
+
 const AnalyticsPage = () => {
-  const [timeFrame, setTimeFrame] = React.useState<
-    "7d" | "30d" | "lastMonth" | "allMonths"
-  >("30d");
+  const [timeFrame, setTimeFrame] = React.useState<TimeFrameType>("30d");
   const { data: stats, isLoading: isLoadingStats } = useDashboardStats();
   const { data: revenueTrends, isLoading: isLoadingRevenueTrends } =
     useRevenueTrends({ timeFrame });
@@ -192,7 +205,7 @@ const AnalyticsPage = () => {
                 </div>
                 <Tabs
                   value={timeFrame}
-                  onValueChange={(v) => setTimeFrame(v as any)}
+                  onValueChange={(v) => setTimeFrame(v as TimeFrameType)}
                 >
                   <TabsList className="grid grid-cols-4 w-64">
                     <TabsTrigger value="7d">7D</TabsTrigger>
@@ -268,7 +281,9 @@ const AnalyticsPage = () => {
                 <Skeleton className="h-[300px] w-full" />
               ) : (
                 <ProductPerformanceTable
-                  products={productPerformance?.top5 as any[]}
+                  products={
+                    (productPerformance?.top5 as ProductPerformance[]) || []
+                  }
                   type="top"
                 />
               )}
@@ -297,7 +312,9 @@ const AnalyticsPage = () => {
                 <Skeleton className="h-[300px] w-full" />
               ) : (
                 <ProductPerformanceTable
-                  products={(productPerformance?.bottom5 as any[]) || []}
+                  products={
+                    (productPerformance?.bottom5 as ProductPerformance[]) || []
+                  }
                   type="bottom"
                 />
               )}

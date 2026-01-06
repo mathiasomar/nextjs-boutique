@@ -58,7 +58,7 @@ const LoginPage = () => {
     );
   };
   return (
-    <div className="w-3/5">
+    <div className="w-3/5 md:w-1/3">
       <Card>
         <CardHeader>
           <CardTitle className="flex flex-col items-center justify-between gap-4">

@@ -125,6 +125,11 @@ export const useCreateOrder = () => {
       queryClient.setQueryData(["orders", variables.id], data);
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["revenueTrends"] });
+      queryClient.invalidateQueries({ queryKey: ["revenueLoss"] });
+      queryClient.invalidateQueries({ queryKey: ["revenueSplit"] });
+      queryClient.invalidateQueries({ queryKey: ["productPerformance"] });
     },
     onError: (error: CustomError) => {
       // Log error to your error tracking service
@@ -157,6 +162,12 @@ export const useUpdateOrder = () => {
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["orders", variables.id], data);
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["revenueTrends"] });
+      queryClient.invalidateQueries({ queryKey: ["revenueLoss"] });
+      queryClient.invalidateQueries({ queryKey: ["revenueSplit"] });
+      queryClient.invalidateQueries({ queryKey: ["productPerformance"] });
     },
     onError: (error: Error) => {
       // Log error to your error tracking service

@@ -27,7 +27,6 @@ const CartItem = ({ product }: { product: CartItemType }) => {
       <TableCell>{product.name}</TableCell>
       <TableCell>{product.quantity}</TableCell>
       <TableCell>{product.price}</TableCell>
-      <TableCell>{product.discout}</TableCell>
       <TableCell className="text-right">{product.totalPrice}</TableCell>
       <TableCell>
         <Button

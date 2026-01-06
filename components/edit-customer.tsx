@@ -118,7 +118,7 @@ const EditCustomer = ({ customer }: { customer: Customer }) => {
               <Alert variant={"destructive"}>
                 <AlertCircleIcon />
                 <AlertTitle>
-                  {updateCustomerMutation.error as string}
+                  {updateCustomerMutation.error.message as string}
                 </AlertTitle>
               </Alert>
             </div>

@@ -50,6 +50,7 @@ const formSchema = z
     price: z.coerce.number().positive(),
     costPrice: z.coerce.number().positive(),
     currentStock: z.coerce.number().int().min(0),
+    minStockLevel: z.coerce.number().int().min(0),
 
     size: z.array(z.enum(sizes)).min(1, "Select at least one size"),
     color: z.array(z.enum(colors)).min(1, "Select at least one color"),
@@ -85,6 +86,7 @@ const AddProduct = () => {
       price: 0,
       costPrice: 0,
       currentStock: 0,
+      minStockLevel: 0,
       size: [],
       color: [],
       images: {},
@@ -276,6 +278,27 @@ const AddProduct = () => {
                         {...field}
                         type="number"
                         id="currentStock"
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="minStockLevel"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="minStockLevel">
+                        Min Stock Level
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        type="number"
+                        id="minStockLevel"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                       />

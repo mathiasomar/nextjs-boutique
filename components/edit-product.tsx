@@ -50,6 +50,8 @@ const formSchema = z
 
     price: z.coerce.number().positive(),
     costPrice: z.coerce.number().positive(),
+    currentStock: z.coerce.number().int().min(0),
+    minStockLevel: z.coerce.number().int().min(0),
 
     brand: z.string().optional(),
     material: z.string().optional(),
@@ -98,6 +100,16 @@ const EditProduct = ({ productId }: { productId: string }) => {
         ? 0
         : (fetchProduct.data?.product &&
             parseInt(String(fetchProduct.data?.product.costPrice))) ||
+          0,
+      currentStock: fetchProduct.isLoading
+        ? 0
+        : (fetchProduct.data?.product &&
+            parseInt(String(fetchProduct.data?.product.currentStock))) ||
+          0,
+      minStockLevel: fetchProduct.isLoading
+        ? 0
+        : (fetchProduct.data?.product &&
+            parseInt(String(fetchProduct.data?.product.minStockLevel))) ||
           0,
       brand: fetchProduct.isLoading
         ? ""
@@ -248,6 +260,48 @@ const EditProduct = ({ productId }: { productId: string }) => {
                       <FieldDescription>
                         This is the cost price of the product from supplier
                       </FieldDescription>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="currentStock"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="currentStock">
+                        Current Stock
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        type="number"
+                        id="currentStock"
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="minStockLevel"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="minStockLevel">
+                        Min Stock Level
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        type="number"
+                        id="minStockLevel"
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
                   )}
                 />

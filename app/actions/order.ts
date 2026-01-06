@@ -269,7 +269,7 @@ export const createOrder = async (formData: CreateOrderInput) => {
           const totalPrice = item.totalPrice || item.quantity * item.unitPrice;
 
           // Update product stock
-          await tx.product.update({
+          const updtproduct = await tx.product.update({
             where: { id: item.productId },
             data: {
               currentStock: {
@@ -277,6 +277,15 @@ export const createOrder = async (formData: CreateOrderInput) => {
               },
             },
           });
+
+          if (updtproduct.currentStock <= updtproduct.minStockLevel) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: {
+                lowStockAlert: true,
+              },
+            });
+          }
 
           return tx.orderItem.create({
             data: {

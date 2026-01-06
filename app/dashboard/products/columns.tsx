@@ -123,8 +123,8 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div className={cn("max-w-sm truncate")}>
           {product.lowStockAlert ? (
-            <span className="rounded-full px-2 py-1 bg-red-600 text-white">
-              Out of stock
+            <span className="w-max rounded-full p-1 bg-red-600 text-white">
+              Low On Stock
             </span>
           ) : (
             "☑️"

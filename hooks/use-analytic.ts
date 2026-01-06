@@ -2,11 +2,14 @@
 
 import {
   getDashboardStats,
+  getProductDetails,
+  getProductPerformance,
   getRevenueLossFromLowStock,
   getRevenueSplitByCategory,
   getRevenueTrends,
   getTopBottomProducts,
 } from "@/app/actions/analytic";
+import { Decimal } from "@prisma/client/runtime/client";
 import { useQuery } from "@tanstack/react-query";
 
 export const useDashboardStats = () => {
@@ -74,6 +77,42 @@ export const useProductPerformance = () => {
         throw new Error("Product Performance not found");
       }
       return result;
+    },
+  });
+};
+
+export const useSingleProductPerformance = ({
+  productId,
+  timeFrame,
+}: {
+  productId: string;
+  timeFrame: "7d" | "30d" | "lastMonth" | "allMonths";
+}) => {
+  return useQuery({
+    queryKey: ["productSinglePerformance", productId, timeFrame],
+    queryFn: async () => {
+      const result = await getProductPerformance(productId, timeFrame);
+      if (!result) {
+        throw new Error("Product Performance not found");
+      }
+      return result;
+    },
+  });
+};
+
+export const useProductDetails = ({ productId }: { productId: string }) => {
+  return useQuery({
+    queryKey: ["productDetails", productId],
+    queryFn: async () => {
+      const result = await getProductDetails(productId);
+      if (!result) {
+        throw new Error("Product Performance not found");
+      }
+      return {
+        ...result,
+        price: new Decimal(result.price.toString()),
+        costPrice: new Decimal(result.costPrice.toString()),
+      };
     },
   });
 };

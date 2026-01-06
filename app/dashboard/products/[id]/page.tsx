@@ -1,7 +1,5 @@
 "use client";
 
-import AppLineChart from "@/components/app-line-chart";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,6 +19,17 @@ import { DataGridSkeleton } from "@/components/loaders/data-grid-skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { formatDistance, subDays } from "date-fns";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+import {
+  useProductDetails,
+  useSingleProductPerformance,
+} from "@/hooks/use-analytic";
+import { Skeleton } from "@/components/ui/skeleton";
+import ProductPerformanceChart, {
+  ProductDetailsType,
+  ProductPerformanceChartProps,
+} from "@/components/analytic/product-performance-chart";
 
 const tableColumn = [
   { header: "Type", accessorKey: "type" as const, className: "w-[100px]" },
@@ -36,9 +45,22 @@ const tableColumn = [
   },
 ];
 
+type TimeFrameType = "7d" | "30d" | "lastMonth" | "allMonths";
+
 const ProductPage = () => {
   const { id } = useParams();
+  const [productTimeFrame, setProductTimeFrame] =
+    useState<TimeFrameType>("30d");
   const { data, isLoading, error } = useProduct(id as string);
+  const { data: productPerformance, isLoading: isLoadingPerformance } =
+    useSingleProductPerformance({
+      productId: id as string,
+      timeFrame: productTimeFrame,
+    });
+  const { data: productDetails, isLoading: isLoadingDetails } =
+    useProductDetails({
+      productId: id as string,
+    });
   return (
     <div>
       <Breadcrumb>
@@ -203,11 +225,39 @@ const ProductPage = () => {
           </div>
           {/* RIGHT */}
           <div className="w-full xl:w-2/3 space-y-6">
-            {/* THE CHART CONTAINER */}
-            <div className="bg-primary-foreground p-4 rounded-lg">
-              <h1 className="text-xl font-semibold">Product Sales Tracking</h1>
-              <AppLineChart />
+            {/* Time Frame Selection for Product */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold">Performance Timeline</h3>
+                <p className="text-sm text-gray-500">
+                  Select time period for analysis
+                </p>
+              </div>
+              <Tabs
+                value={productTimeFrame}
+                onValueChange={(v) => setProductTimeFrame(v as TimeFrameType)}
+              >
+                <TabsList>
+                  <TabsTrigger value="7d">7D</TabsTrigger>
+                  <TabsTrigger value="30d">30D</TabsTrigger>
+                  <TabsTrigger value="lastMonth">Last Month</TabsTrigger>
+                  <TabsTrigger value="allMonths">12M</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
+            {/* Product Performance Chart */}
+            {isLoadingPerformance || isLoadingDetails ? (
+              <Skeleton className="h-[500px] w-full" />
+            ) : (
+              <ProductPerformanceChart
+                data={
+                  productPerformance as ProductPerformanceChartProps["data"]
+                }
+                timeFrame={productTimeFrame}
+                productDetails={productDetails as ProductDetailsType}
+              />
+            )}
+
             {/* INVENTORY */}
             <div className="bg-primary-foreground p-4 rounded-lg">
               <div className="flex items-center justify-between mb-4">

@@ -58,7 +58,7 @@ const LoginPage = () => {
     );
   };
   return (
-    <div className="w-1/3">
+    <div className="w-3/5">
       <Card>
         <CardHeader>
           <CardTitle className="flex flex-col items-center justify-between gap-4">
@@ -70,8 +70,12 @@ const LoginPage = () => {
               priority
               className=""
             />
-            <h1 className="text-3xl font-bold">NAJTRENDS BOUTIQUE</h1>
-            <p>Login to your account</p>
+            <h1 className="text-2xl text-center font-bold md:text-3xl">
+              NAJTRENDS BOUTIQUE
+            </h1>
+            <p className="text-center text-sm md:text-md">
+              Login to your account
+            </p>
           </CardTitle>
         </CardHeader>
         <CardContent>

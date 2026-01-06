@@ -22,10 +22,7 @@ const useCartStore = create<CartStoreStateType & CartStoreActionsType>()(
             const total =
               updatedCart[existingIndex]!.price *
               updatedCart[existingIndex]!.quantity;
-            const discountPrice =
-              (total * updatedCart[existingIndex]!.discout) / 100;
-            const priceAfterDiscount = total - discountPrice;
-            updatedCart[existingIndex]!.totalPrice = priceAfterDiscount;
+            updatedCart[existingIndex]!.totalPrice = total;
             return { cart: updatedCart };
           }
 
@@ -38,7 +35,6 @@ const useCartStore = create<CartStoreStateType & CartStoreActionsType>()(
                 quantity: product.quantity || 1,
                 selectedSize: product.selectedSize,
                 selectedColor: product.selectedColor,
-                discout: product.discout || 0,
                 totalPrice: product.totalPrice,
               },
             ],

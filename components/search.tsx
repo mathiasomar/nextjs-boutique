@@ -33,14 +33,14 @@ const Search = () => {
       <div className="max-w-sm">
         <InputGroup>
           <InputGroupInput
-            className="text-xs md:text-lg"
+            className="text-xs md:text-sm"
             placeholder="Type to search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
           <InputGroupAddon align="inline-end">
             <InputGroupButton
-              className="text-xs md:text-lg"
+              className="text-xs md:text-sm"
               variant="secondary"
               onClick={() => handleSearch(searchValue)}
             >
@@ -50,7 +50,7 @@ const Search = () => {
         </InputGroup>
       </div>
       <Button
-        className="text-xs md:text-lg"
+        className="text-xs md:text-sm"
         variant={"outline"}
         onClick={handleClearSearch}
       >

@@ -66,7 +66,7 @@ const AddCategory = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button size="sm" className="text-xs md:text-lg">
+        <Button size="sm" className="text-xs md:text-sm">
           <Plus />
           Add Category
         </Button>

@@ -21,6 +21,9 @@ const Navbar = () => {
     await authClient.signOut();
     redirect("/");
   };
+
+  const { data: session } = authClient.useSession();
+  if (!session) return null;
   return (
     <nav className="p-4 flex items-center justify-between sticky bg-background top-0 z-10">
       {/* LEFT */}
@@ -34,20 +37,26 @@ const Navbar = () => {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={session.user?.image || ""} />
+              <AvatarFallback>
+                {session.user?.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent sideOffset={10}>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="h-[1.2rem] w-[1.2rem] mr-2" />
-              Profile
+            <DropdownMenuItem asChild>
+              <Link href={`/dashboard/profile/${session?.user.id}`}>
+                <User className="h-[1.2rem] w-[1.2rem] mr-2" />
+                Profile
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
-              Settings
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings">
+                <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
+                Settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem variant="destructive" onClick={handleLogout}>
               <LogOut className="h-[1.2rem] w-[1.2rem] mr-2" />

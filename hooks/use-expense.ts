@@ -36,7 +36,7 @@ export const useExpenses = (filters?: {
   });
 };
 
-export const useExpense = (id: string) => {
+export const useExpense = (id: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["expense", id],
     queryFn: async () => {
@@ -47,6 +47,7 @@ export const useExpense = (id: string) => {
 
       return result;
     },
+    enabled: options?.enabled ?? true, // Default to true, but can be overridden
   });
 };
 

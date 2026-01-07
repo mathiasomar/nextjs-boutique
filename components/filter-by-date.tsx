@@ -40,7 +40,7 @@ const FilterByDate = () => {
     setEndDate(undefined);
   };
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center flex-col gap-4 md:flex-row">
       <div className="flex items-center gap-2">
         <Label htmlFor="date" className="px-1">
           From:

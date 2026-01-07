@@ -108,21 +108,6 @@ const AddProduct = () => {
   }, [open, form]);
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
-    // try {
-    //   setLoading(true);
-    //   await createProduct(data);
-    //   setOpen(false);
-    //   form.reset();
-    //   toast.success("Product added successfully!");
-    // } catch (error) {
-    //   setError(error as string);
-    //   toast.error("Failed to add product. Please try again.");
-    //   setLoading(false);
-    // } finally {
-    //   setLoading(false);
-    // }
-    // console.log("SUBMITTED", data);
-
     try {
       addProductMutation.mutateAsync(data, {
         onSuccess: () => {
@@ -144,7 +129,7 @@ const AddProduct = () => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        <ScrollArea className="min-h-screen py-4">
+        <ScrollArea className="h-[80vh]">
           {addProductMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>
@@ -377,9 +362,6 @@ const AddProduct = () => {
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
-                      <FieldDescription>
-                        Enter the available sizes for the product
-                      </FieldDescription>
                     </Field>
                   )}
                 />
@@ -427,9 +409,6 @@ const AddProduct = () => {
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
-                      <FieldDescription>
-                        Enter the available sizes for the product
-                      </FieldDescription>
                     </Field>
                   )}
                 />

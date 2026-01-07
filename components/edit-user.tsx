@@ -100,7 +100,7 @@ const EditUser = ({ userId }: EditUserSheetProps) => {
           </div>
         )}
         <SheetHeader>
-          <SheetTitle className="mb-4">Add User</SheetTitle>
+          <SheetTitle className="mb-4">Edit User</SheetTitle>
           <SheetDescription asChild>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <FieldGroup>

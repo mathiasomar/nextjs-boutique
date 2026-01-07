@@ -26,7 +26,7 @@ export const useCustomers = (filters?: {
   });
 };
 
-export const useCustomer = (id: string) => {
+export const useCustomer = (id: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["customers", id],
     queryFn: async () => {
@@ -36,6 +36,7 @@ export const useCustomer = (id: string) => {
       }
       return result;
     },
+    enabled: options?.enabled ?? true, // Default to true, but can be overridden
   });
 };
 

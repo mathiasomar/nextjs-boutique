@@ -131,7 +131,7 @@ const EditCustomer = ({ customer }: { customer: Customer }) => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        <ScrollArea className="h-[80vh]">
+        <ScrollArea className="h-[95vh] md:h-screen">
           {updateCustomerMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>

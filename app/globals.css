@@ -183,6 +183,6 @@
   }
 
   html {
-    @apply scroll-smooth text-sm;
+    @apply scroll-smooth text-xs sm:text-sm xl:text-base 2xl:text-2xl;
   }
 }

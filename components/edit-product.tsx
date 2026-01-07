@@ -160,7 +160,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        <ScrollArea className="h-[95vh] md:h-screen">
+        <ScrollArea className="h-[90vh] md:h-screen">
           {updateProductMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>

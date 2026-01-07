@@ -30,15 +30,17 @@ const Search = () => {
   };
   return (
     <div className="flex items-center gap-4">
-      <div className="min-w-[400px]">
+      <div className="max-w-sm">
         <InputGroup>
           <InputGroupInput
+            className="text-xs md:text-lg"
             placeholder="Type to search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
           <InputGroupAddon align="inline-end">
             <InputGroupButton
+              className="text-xs md:text-lg"
               variant="secondary"
               onClick={() => handleSearch(searchValue)}
             >
@@ -47,7 +49,11 @@ const Search = () => {
           </InputGroupAddon>
         </InputGroup>
       </div>
-      <Button variant={"outline"} onClick={handleClearSearch}>
+      <Button
+        className="text-xs md:text-lg"
+        variant={"outline"}
+        onClick={handleClearSearch}
+      >
         All
       </Button>
     </div>

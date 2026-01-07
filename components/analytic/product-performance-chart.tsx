@@ -330,7 +330,7 @@ const ProductPerformanceChart = ({
               </div>
               <div className="flex items-center flex-wrap gap-2">
                 <div className="text-2xl font-bold">
-                  ${(productDetails?.lastMonthRevenue || 0).toLocaleString()}
+                  KSH{(productDetails?.lastMonthRevenue || 0).toLocaleString()}
                 </div>
                 {productDetails?.revenueChangePercent !== undefined && (
                   <div
@@ -426,7 +426,7 @@ const ProductPerformanceChart = ({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                $
+                KSH
                 {(
                   data.reduce((sum, day) => sum + day.revenue, 0) / data.length
                 ).toFixed(2)}

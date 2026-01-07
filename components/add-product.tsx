@@ -138,7 +138,7 @@ const AddProduct = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
+        <Button size="sm" className="text-xs md:text-lg">
           <Plus />
           Add Product
         </Button>

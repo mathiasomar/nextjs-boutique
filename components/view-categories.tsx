@@ -31,7 +31,7 @@ const ViewCategories = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant={"outline"}>
+        <Button variant={"outline"} size="sm" className="text-xs md:text-lg">
           <Eye />
           View Category
         </Button>

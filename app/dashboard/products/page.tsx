@@ -53,9 +53,9 @@ const ProductsPage = async () => {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="flex items-center justify-between mb-8 px-4 py-2 bg-secondary roundedn-md">
-        <h1 className="font-semiboldnn">All Products</h1>
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4 mb-8 px-4 py-2 bg-secondary roundedn-md">
+        <h1 className="font-semibold hidden md:block">All Products</h1>
+        <div className="flex items-center flex-wrap gap-4">
           <AddCategory />
           <ViewCategories />
           <AddProduct />

@@ -1,6 +1,6 @@
 import CardList from "@/components/card-list";
 import { OrderStatusChart } from "@/components/dashboard/order-status";
-import TodoList from "@/components/todo-list";
+// import TodoList from "@/components/todo-list";
 import prisma from "@/lib/prisma";
 import React from "react";
 import { getOrderStatusSummary } from "../actions/order";
@@ -70,9 +70,9 @@ const HomePage = async () => {
         <div className="bg-primary-foreground p-4 rounded-lg">
           <OrderStatusChart data={orderStatus} />
         </div>
-        <div className="bg-primary-foreground p-4 rounded-lg">
+        {/* <div className="bg-primary-foreground p-4 rounded-lg">
           <TodoList />
-        </div>
+        </div> */}
         <div className="bg-primary-foreground p-4 rounded-lg lg:col-span-2 xl:col-span-1 2xl:col-span-2">
           <RevenueChart />
         </div>

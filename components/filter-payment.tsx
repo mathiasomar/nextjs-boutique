@@ -40,7 +40,7 @@ const PaymentFilters = () => {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
   return (
-    <div className="flex items-center gap-4 mb-4">
+    <div className="flex items-center flex-col md:flex-row gap-4 mb-4">
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold">Method: </span>
         <Select

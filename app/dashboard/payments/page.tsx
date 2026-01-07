@@ -322,7 +322,7 @@ const PayementsPage = async () => {
       <div className="mb-8 px-4 py-2 bg-secondary roundedn-md">
         <h1 className="font-semiboldnn">All Payments</h1>
       </div>
-      <div className="flex items-center justify-between flex-col md:flex-row gap-4 mb-8 px-4 py-2 bg-secondary roundedn-md">
+      <div className="flex items-center justify-between flex-col lg:flex-row gap-4 mb-8 px-4 py-2 bg-secondary roundedn-md">
         {/* Search Bar */}
         <Search />
         <div className="flex items-center gap-4">

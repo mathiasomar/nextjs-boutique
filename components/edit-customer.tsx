@@ -115,6 +115,7 @@ const EditCustomer = ({ customer }: { customer: Customer }) => {
           onSuccess: () => {
             setOpen(false);
             toast.success("Customer updated successfully!");
+            refetch();
           },
         }
       );

@@ -187,6 +187,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         id="name"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -209,6 +210,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         aria-invalid={fieldState.invalid}
                         placeholder="Enter Description"
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -231,6 +233,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         id="price"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -253,6 +256,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         id="costPrice"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -277,6 +281,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         id="currentStock"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -298,6 +303,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         id="minStockLevel"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -316,6 +322,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         id="brand"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -334,6 +341,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                         id="material"
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
+                        disabled={updateProductMutation.isPending}
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -350,6 +358,7 @@ const EditProduct = ({ productId }: { productId: string }) => {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={updateProductMutation.isPending}
                       >
                         <SelectTrigger aria-invalid={fieldState.invalid}>
                           <SelectValue placeholder="Select Category" />

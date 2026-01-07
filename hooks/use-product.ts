@@ -40,7 +40,7 @@ export const useProducts = (filters?: {
   });
 };
 
-export const useProduct = (id: string) => {
+export const useProduct = (id: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["products", id],
     queryFn: async () => {
@@ -58,6 +58,7 @@ export const useProduct = (id: string) => {
         },
       };
     },
+    enabled: options?.enabled ?? true, // Default to true, but can be overridden
   });
 };
 

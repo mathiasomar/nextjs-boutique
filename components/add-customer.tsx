@@ -111,7 +111,7 @@ const AddCustomer = () => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        <ScrollArea className="h-[90vh] md:h-screen">
+        <ScrollArea className="h-[85vh] md:h-screen">
           {addCustomerMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>

@@ -144,7 +144,7 @@ const AddProduct = () => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        <ScrollArea className="h-screen">
+        <ScrollArea className="min-h-screen py-4">
           {addProductMutation.isError && (
             <div className="my-2">
               <Alert variant={"destructive"}>

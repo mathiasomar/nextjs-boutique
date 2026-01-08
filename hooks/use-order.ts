@@ -11,7 +11,7 @@ import {
   getProductPerformance,
   getTopProducts,
   updateOrderStatus,
-} from "@/app/actions/order";
+} from "@/app/actions/order.action";
 import { CreateOrderInput, OrderFilters } from "@/app/types";
 import {
   OrderStatus,

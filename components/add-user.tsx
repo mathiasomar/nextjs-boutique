@@ -28,7 +28,7 @@ import { Alert, AlertTitle } from "./ui/alert";
 import { AlertCircleIcon, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
-import { revalidateUser } from "@/app/actions/user";
+import { revalidateUser } from "@/app/actions/user.action";
 
 const formSchema = z.object({
   name: z

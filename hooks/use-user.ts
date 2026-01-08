@@ -3,7 +3,7 @@ import {
   getuser,
   getUsers,
   updateUser,
-} from "@/app/actions/user";
+} from "@/app/actions/user.action";
 import { User } from "@/generated/prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 

@@ -3,7 +3,7 @@ import { OrderStatusChart } from "@/components/dashboard/order-status";
 // import TodoList from "@/components/todo-list";
 import prisma from "@/lib/prisma";
 import React from "react";
-import { getOrderStatusSummary } from "../actions/order";
+import { getOrderStatusSummary } from "../actions/order.action";
 import { ProductPerformanceChart } from "@/components/dashboard/product-performance";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 

@@ -23,7 +23,7 @@ import { DataTablePagination } from "@/components/data-table-pagination";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { deleteManyProducts } from "@/app/actions/product";
+import { deleteManyProducts } from "@/app/actions/product.action";
 import toast from "react-hot-toast";
 import { useDeleteProduct } from "@/hooks/use-product";
 

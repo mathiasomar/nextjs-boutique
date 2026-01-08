@@ -2,7 +2,7 @@ import {
   addCategory,
   deleteCategory,
   getCategories,
-} from "@/app/actions/category";
+} from "@/app/actions/category.action";
 import {
   createProduct,
   deleteManyProducts,
@@ -10,7 +10,7 @@ import {
   getProducts,
   updateProduct,
   updateStock,
-} from "@/app/actions/product";
+} from "@/app/actions/product.action";
 import { InventoryType, Prisma, Product } from "@/generated/prisma/client";
 import { Decimal } from "@prisma/client/runtime/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

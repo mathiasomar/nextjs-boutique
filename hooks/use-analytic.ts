@@ -8,7 +8,7 @@ import {
   getRevenueSplitByCategory,
   getRevenueTrends,
   getTopBottomProducts,
-} from "@/app/actions/analytic";
+} from "@/app/actions/analytic.action";
 import { Decimal } from "@prisma/client/runtime/client";
 import { useQuery } from "@tanstack/react-query";
 

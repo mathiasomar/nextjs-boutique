@@ -4,7 +4,7 @@
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
-import { updateStock } from "./product";
+import { updateStock } from "./product.action";
 // import { revalidatePath } from "next/cache";
 import { OrderStatus, PaymentMethod } from "@/generated/prisma/enums";
 import {

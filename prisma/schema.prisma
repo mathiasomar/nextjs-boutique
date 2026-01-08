@@ -367,3 +367,38 @@ model Expense {
   // relation
   user User? @relation(fields: [userId], references: [id])
 }
+
+model SystemSettings {
+  id            String         @id @default(cuid())
+  key           String         @unique
+  value         String?
+  type          String         @default("string") // string, number, boolean, json, file
+  category      String         @default("general")
+  displayName   String
+  description   String?
+  isPublic      Boolean        @default(false)
+  updatedBy     String?
+  updatedAt     DateTime       @updatedAt
+  uploadedFiles UploadedFile[]
+
+  @@index([category])
+  @@index([isPublic])
+  @@map("settings")
+}
+
+// Optional: If you want to store files/logo separately
+model UploadedFile {
+  id         String   @id @default(cuid())
+  filename   String
+  path       String
+  mimeType   String
+  size       Int
+  key        String   @unique // Reference key for settings
+  uploadedBy String?
+  uploadedAt DateTime @default(now())
+
+  settings         SystemSettings? @relation(fields: [systemSettingsId], references: [id])
+  systemSettingsId String?
+
+  @@map("uploads")
+}

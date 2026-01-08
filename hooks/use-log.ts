@@ -1,4 +1,4 @@
-import { getActivityLogs, getInventoryLogs } from "@/app/actions/log";
+import { getActivityLogs, getInventoryLogs } from "@/app/actions/log.action";
 import { InventoryType } from "@/generated/prisma/enums";
 import { useQuery } from "@tanstack/react-query";
 

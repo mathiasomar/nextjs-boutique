@@ -6,7 +6,7 @@ import {
   getExpenseById,
   getExpenses,
   updateExpense,
-} from "@/app/actions/expense";
+} from "@/app/actions/expense.action";
 import { Expense, Prisma } from "@/generated/prisma/client";
 import { CustomError } from "@/lib/error-class";
 import { Decimal } from "@prisma/client/runtime/client";

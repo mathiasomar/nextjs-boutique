@@ -1,5 +1,5 @@
 "use client";
-import { getPayments } from "@/app/actions/payment";
+import { getPayments } from "@/app/actions/payment.action";
 import { PaymentMethod, PaymentStatus } from "@/generated/prisma/enums";
 import { Decimal } from "@prisma/client/runtime/client";
 import { useQuery } from "@tanstack/react-query";

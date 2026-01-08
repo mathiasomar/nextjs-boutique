@@ -4,7 +4,7 @@ import {
   getCustomerById,
   getCustomers,
   updateCustomer,
-} from "@/app/actions/customer";
+} from "@/app/actions/customer.action";
 import { Customer, Prisma } from "@/generated/prisma/client";
 import { CustomError } from "@/lib/error-class";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

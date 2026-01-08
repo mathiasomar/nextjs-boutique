@@ -75,11 +75,11 @@ const items = [
     url: "/dashboard/logs",
     icon: Logs,
   },
-  {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: Settings,
-  },
+  // {
+  //   title: "Settings",
+  //   url: "/dashboard/settings",
+  //   icon: Settings,
+  // },
 ];
 
 const AppSidebar = () => {

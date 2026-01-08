@@ -52,12 +52,12 @@ const Navbar = () => {
                 Profile
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            {/* <DropdownMenuItem asChild>
               <Link href="/dashboard/settings">
                 <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
                 Settings
               </Link>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuItem variant="destructive" onClick={handleLogout}>
               <LogOut className="h-[1.2rem] w-[1.2rem] mr-2" />
               Logout

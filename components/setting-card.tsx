@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { ChangeEvent, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import AddSetting from "./add-setting";
+// import AddSetting from "./add-setting";
 import { SettingCategory } from "@/generated/prisma/enums";
 import { useSettingsByCategory } from "@/hooks/use-setting";
 import { TableMinimalSkeleton } from "./loaders/table-minimal-skeleton";
@@ -318,9 +318,9 @@ const SettingCard = ({ category }: { category: SettingCategory }) => {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-end my-2">
+            {/* <div className="flex items-center justify-end my-2">
               <AddSetting category={category as SettingCategory} />
-            </div>
+            </div> */}
             {isLoadingSettings ? (
               <TableMinimalSkeleton />
             ) : (

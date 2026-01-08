@@ -7,7 +7,7 @@ const SettingCards = () => {
     <div className="w-full py-4 space-y-10">
       <SettingCard category="branding" />
       <SettingCard category="general" />
-      <SettingCard category="payments" />
+      <SettingCard category="payment" />
       <SettingCard category="database" />
       <SettingCard category="other" />
     </div>

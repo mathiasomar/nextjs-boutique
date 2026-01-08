@@ -381,7 +381,7 @@ export const updateStock = async (
       where: { id: productId },
       data: {
         currentStock: newStock,
-        lowStockAlert: newStock <= product.minStockLevel,
+        lowStockAlert: newStock <= product.minStockLevel ? true : false,
       },
     });
 

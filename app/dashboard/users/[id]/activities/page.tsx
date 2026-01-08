@@ -15,7 +15,7 @@ const UserActivitiesPage = async ({
 }) => {
   const { id } = await params;
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 py-4">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

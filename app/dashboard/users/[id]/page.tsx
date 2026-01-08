@@ -1,6 +1,5 @@
 "use client";
 
-import AppLineChart from "@/components/app-line-chart";
 import EditUser from "@/components/edit-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -18,12 +17,21 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, BadgeCheck, Candy, Citrus, Shield } from "lucide-react";
+import {
+  AlertCircle,
+  BadgeCheck,
+  Candy,
+  Citrus,
+  Shield,
+  View,
+} from "lucide-react";
 import { formatDistance, subDays } from "date-fns";
 import { useParams } from "next/navigation";
 import { UserProfileSkeleton } from "@/components/loaders/user-profile-skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useUser } from "@/hooks/use-user";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const SingleUserPage = () => {
   const { id } = useParams();
@@ -51,7 +59,7 @@ const SingleUserPage = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            <BreadcrumbLink href="/dasboard">Dashboard</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -160,52 +168,58 @@ const SingleUserPage = () => {
                 mollitia, assumenda maiores expedita!
               </p>
             </div>
-            {/* INFORMATION CONTAINER */}
-            <div className="bg-primary-foreground p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <h1 className="text-xl font-semibold">User Information</h1>
-                <EditUser userId={(user as { id: string }).id} />
-              </div>
-              <div className="space-y-4 mt-4">
-                <div className="flex flex-col gap-2 mb-8">
-                  <p className="text-sm text-muted-foreground">
-                    Profile completion
-                  </p>
-                  <Progress value={66} />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold">Full Name:</span>
-                  <span>{(user as { name: string }).name || "Test User"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold">Email:</span>
-                  <span>
-                    {(user as { email: string }).email || "someone@gmail.com"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold">Role:</span>
-                  <span>{(user as { role: string }).role || "Test User"}</span>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Joined{" "}
-                {formatDistance(
-                  subDays((user as { createdAt: Date }).createdAt, 3),
-                  new Date(),
-                  {
-                    addSuffix: true,
-                  }
-                )}
-              </p>
-            </div>
+            <Button variant="outline" asChild>
+              <Link href={`/dashboard/users/${id}/activities`}>
+                <View /> View User Activities
+              </Link>
+            </Button>
           </div>
           {/* RIGHT */}
           <div className="w-full xl:w-2/3 space-y-6">
-            {/* THE CHART CONTAINER */}
             <div className="bg-primary-foreground p-4 rounded-lg">
-              <h1 className="text-xl font-semibold">User Activity</h1>
-              <AppLineChart />
+              {/* INFORMATION CONTAINER */}
+              <div className="bg-primary-foreground p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-xl font-semibold">User Information</h1>
+                  <EditUser userId={(user as { id: string }).id} />
+                </div>
+                <div className="space-y-4 mt-4">
+                  <div className="flex flex-col gap-2 mb-8">
+                    <p className="text-sm text-muted-foreground">
+                      Profile completion
+                    </p>
+                    <Progress value={66} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">Full Name:</span>
+                    <span>
+                      {(user as { name: string }).name || "Test User"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">Email:</span>
+                    <span>
+                      {(user as { email: string }).email || "someone@gmail.com"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">Role:</span>
+                    <span>
+                      {(user as { role: string }).role || "Test User"}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">
+                  Joined{" "}
+                  {formatDistance(
+                    subDays((user as { createdAt: Date }).createdAt, 3),
+                    new Date(),
+                    {
+                      addSuffix: true,
+                    }
+                  )}
+                </p>
+              </div>
             </div>
           </div>
         </div>

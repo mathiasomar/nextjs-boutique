@@ -78,6 +78,15 @@ enum AppointmentType {
   OTHER
 }
 
+enum SettingCategory {
+  general
+  payment
+  file
+  database
+  other
+  branding
+}
+
 model UserCode {
   id   String @id @default(cuid())
   code Int    @unique
@@ -87,20 +96,22 @@ model UserCode {
 }
 
 model User {
-  id            String         @id
+  id            String           @id
   name          String
   email         String
-  emailVerified Boolean        @default(false)
+  emailVerified Boolean          @default(false)
   image         String?
-  role          Role           @default(STAFF)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  role          Role             @default(STAFF)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   sessions      Session[]
   accounts      Account[]
   orders        Order[]
   inventoryLogs InventoryLog[]
   activityLogs  ActivityLog[]
   expenses      Expense[]
+  settings      SystemSettings[]
+  uploadFiles   UploadedFile[]
 
   @@unique([email])
   @@map("users")
@@ -369,17 +380,19 @@ model Expense {
 }
 
 model SystemSettings {
-  id            String         @id @default(cuid())
-  key           String         @unique
+  id            String          @id @default(cuid())
+  key           String          @unique
   value         String?
-  type          String         @default("string") // string, number, boolean, json, file
-  category      String         @default("general")
+  type          String          @default("string") // string, number, boolean, json, file
+  category      SettingCategory @default(general)
   displayName   String
   description   String?
-  isPublic      Boolean        @default(false)
-  updatedBy     String?
-  updatedAt     DateTime       @updatedAt
+  isPublic      Boolean         @default(false)
+  updatedById   String?
+  updatedAt     DateTime        @updatedAt
   uploadedFiles UploadedFile[]
+
+  updatedBy User? @relation(fields: [updatedById], references: [id])
 
   @@index([category])
   @@index([isPublic])
@@ -388,17 +401,18 @@ model SystemSettings {
 
 // Optional: If you want to store files/logo separately
 model UploadedFile {
-  id         String   @id @default(cuid())
-  filename   String
-  path       String
-  mimeType   String
-  size       Int
-  key        String   @unique // Reference key for settings
-  uploadedBy String?
-  uploadedAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  filename     String
+  path         String
+  mimeType     String
+  size         Int
+  key          String   @unique // Reference key for settings
+  uploadedById String?
+  uploadedAt   DateTime @default(now())
 
-  settings         SystemSettings? @relation(fields: [systemSettingsId], references: [id])
+  settings         SystemSettings? @relation(fields: [systemSettingsId], references: [id], onDelete: Cascade)
   systemSettingsId String?
+  uploadedBy       User?           @relation(fields: [uploadedById], references: [id])
 
   @@map("uploads")
 }

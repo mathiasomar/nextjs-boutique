@@ -82,6 +82,13 @@ export const useCreateProduct = () => {
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["products", variables.id], data);
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["productSinglePerformance"] });
+      queryClient.setQueryData(
+        ["productSinglePerformance", variables.id],
+        data
+      );
+      queryClient.invalidateQueries({ queryKey: ["productDetails"] });
+      queryClient.setQueryData(["productDetails", variables.id], data);
     },
   });
 };
@@ -109,6 +116,13 @@ export const useUpdateProduct = () => {
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["products", variables.id], data);
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["productSinglePerformance"] });
+      queryClient.setQueryData(
+        ["productSinglePerformance", variables.id],
+        data
+      );
+      queryClient.invalidateQueries({ queryKey: ["productDetails"] });
+      queryClient.setQueryData(["productDetails", variables.id], data);
     },
   });
 };
@@ -139,6 +153,13 @@ export const useUpdateProductStock = () => {
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["products", variables.id], data);
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["productSinglePerformance"] });
+      queryClient.setQueryData(
+        ["productSinglePerformance", variables.id],
+        data
+      );
+      queryClient.invalidateQueries({ queryKey: ["productDetails"] });
+      queryClient.setQueryData(["productDetails", variables.id], data);
     },
   });
 };

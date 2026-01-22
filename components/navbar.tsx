@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
@@ -25,7 +25,7 @@ const Navbar = () => {
   const { data: session } = authClient.useSession();
   if (!session) return null;
   return (
-    <nav className="p-4 flex items-center justify-between sticky bg-background top-0 z-10">
+    <nav className="p-4 flex items-center justify-between sticky bg-background top-0 z-2">
       {/* LEFT */}
       <SidebarTrigger />
       {/* RIGHT */}
